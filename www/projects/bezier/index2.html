@@ -111,7 +111,7 @@
 							ctx.stroke();
 							ctx.closePath();
 						}
-					});
+					}, {redraw: "always"});
 
 					function transition(curveIndex) {
 						var len = pathLength[curveIndex], seg = len[0], index = 0, anchors = [];

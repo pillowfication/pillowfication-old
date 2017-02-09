@@ -42,7 +42,7 @@
 				elem.append("<span class=\"label\">"+options[i]+"</span><input id=\""+options[i]+"\" type=\"text\" value=\""+options[i+1]+"\"><br>");
 			elem.append("<br><br><input type=\"button\" value=\"redraw\" onclick=\"redraw();\">");
 			redraw();
-			
+
 			$("#canvas").pillowcanvas(function(ctx) {
 				ctx.fillStyle = "#000000";
 				ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -103,7 +103,7 @@
 				ctx.drawImage(GO.canvas, (ctx.canvas.width-GO.canvas.width)/2, ctx.canvas.height-GO.canvas.height);
 				ctx.drawImage(GF.canvas, (ctx.canvas.width-GF.canvas.width)/2, ctx.canvas.height-GF.canvas.height);
 				ctx.drawImage(GL.canvas, (ctx.canvas.width-GL.canvas.width)/2, ctx.canvas.height-GL.canvas.height);
-			});
+			}, {redraw: "always"});
 		});
 	</script>
 </head>

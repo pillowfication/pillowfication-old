@@ -12,7 +12,7 @@
 	<script src="../../assets/js/pillow/pfdelaunay.js"></script>
 	<script>
 		$(function() {
-			
+
 			var cx = 0, cy = 0, sides = 4, radius = 500, offset = Math.PI/4;
 			var domain = [];
 			for (var i = 0; i < sides; ++i) {
@@ -20,14 +20,14 @@
 				domain.push({x: radius*Math.cos(theta), y: radius*Math.sin(theta)});
 			}
 			var points = poisson(domain, 20, domain);
-			
+
 			/*
 			var cell = 25, dx = 500, dy = 400;
 			var points = [];
 			for (var X = -dx; X <= dx; X += cell)
 				for (var Y = -dy; Y <= dy; Y += cell)
 					points.push({x: X, y: Y});
-			
+
 			/*
 			var dx = 1000, dy = 1000, num = 1000;
 			var points = [];
@@ -36,15 +36,14 @@
 				points.push({x: Math.random()*dx-hdx, y: Math.random()*dy-hdy});
 			*/
 
-			var triang = delaunay(points);
+			var triang = Pillow.delaunay(points).triangles;
 
-			
 			var colors = [];
 			for (var i = 0; i < triang.length; ++i) {
 				var c = ("0"+(256*Math.random()|0).toString(16)).slice(-2);
 				colors.push("#"+c+c+"FF");
 			}
-			
+
 			/*
 			var pcolors = [], colors = [];
 			for (var i = 0; i < points.length; ++i)

@@ -240,7 +240,7 @@
 					if (k[5] > k[6])
 						branches.splice(i--);
 				}
-			}, 60);
+			}, {redraw: "always"});
 
 			$("#redraw").click(init);
 

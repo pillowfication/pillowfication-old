@@ -224,7 +224,7 @@
 					ctx.font = "30px Verdana";
 					ctx.fillText("Lines: "+lines, x/2-90, y/2+70);
 				}
-			});
+			}, {redraw: "always"});
 			$(document).keydown(function(e) {
 				switch (e.keyCode) {
 					case left: fleft(); break;

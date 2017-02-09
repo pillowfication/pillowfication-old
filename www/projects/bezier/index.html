@@ -195,7 +195,7 @@
 							ctx.stroke();
 							ctx.closePath();
 						}
-					});
+					}, {redraw: "always"});
 
 					$("#particles").keyup(function() {
 						NUM_PART = parseInt($(this).val());
