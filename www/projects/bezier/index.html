@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Texty Bezier</title>
+	<style>
+		html, body {width: 100%; height: 100%; margin: 0px; border: 0px; padding: 0px; overflow: hidden; color: #FFFFFF}
+		#canvas    {position: fixed; top: 0px; left: 0px; box-sizing: border-box; width: 100%; height: 100%; border-right: 400px solid #000000; background-color: #000000}
+		#options   {position: fixed; top: 0px; right: 0px; box-sizing: border-box; width: 400px; height: 100%; border-left: 2px solid #FFFFFF; padding: 30px; overflow: auto}
+		#tab       {position: fixed; top: 0px; right: 398px; box-sizing: border-box; width: 30px; height: 50px; border: 2px solid #FFFFFF; padding-top: 12px; text-align: center; font-weight: 900; line-height: 10px; cursor: pointer}
+		#right     {display: block}
+		#left      {display: none}
+		.hide #canvas  {border-right: 0px}
+		.hide #options {right: -400px}
+		.hide #tab     {right: -2px}
+		.hide #right   {display: none}
+		.hide #left    {display: block}
+		.label     {display: inline-block; width: 120px}
+		input {border: 1px solid #FFFFFF; padding: 3px; background-color: #000000; color: #FFFFFF}
+	</style>
+	<script src="../../assets/js/jquery.js"></script>
+	<script src="../../assets/js/pillow/pfcanvas.js"></script>
+	<script src="../../assets/js/opentype.min.js"></script>
+	<script>
+		$(function() {
+			var NUM_PART = 100, STEP = 1/NUM_PART, PI2 = Math.PI*2;
+			var particles = [], shuff = false, size = 300;
+
+			opentype.load("Rakoon.ttf", function(err, font) {
+				if (err)
+					console.log("Font could not be loaded: "+err);
+				else {
+					var paths = [], pathLength = [], currltr = 0;
+
+					function initialize(text) {
+						text = text || "!";
+						particles = [], paths = [], pathLength = [], currltr = 0;
+
+						for (var i = 0; i < NUM_PART; ++i)
+							particles.push({x: 0, y: 0, t: 0, a:{x: 0, y: 0, t: 0}});
+
+						for (var i = 0; i < text.length; ++i) {
+							var letter = [], letterPath = font.getPath(text.charAt(i), -size/2, size/2, size);
+							for (var j = 0, prev, next; j < letterPath.commands.length; ++j, prev = next) {
+								var c = letterPath.commands[j];
+								switch(c.type) {
+									case "M":
+										next = {x: c.x, y: -c.y};
+										break;
+									case "L":
+										next = {x: c.x, y: -c.y};
+										letter.push([prev, next]);
+										break;
+									case "C":
+										next = {x: c.x, y: -c.y};
+										console.log("moo"); // too lazy to implement this functionality. never even seen it used
+										break;
+									case "Q":
+										next = {x: c.x, y: -c.y};
+										letter.push([prev, {x: c.x1, y: -c.y1}, next]);
+										break;
+									case "Z":
+										break;
+								}
+							}
+							if (letter.length > 0)
+								paths.push(letter);
+						}
+
+						for (var i = 0; i < paths.length; ++i) {
+							var path = [], sum = 0;
+							for (var j = 0; j < paths[i].length; ++j) {
+								var l = BCurveLength(paths[i][j], 20);
+								path.push(l);
+								sum += l;
+							}
+							for (var j = 0; j < paths[i].length; ++j)
+								path[j] /= sum;
+							pathLength.push(path);
+						}
+
+						if (paths.length == 0)
+							initialize();
+					}
+					function transition(curveIndex) {
+						var len = pathLength[curveIndex], seg = len[0], index = 0, anchors = [];
+						for (var i = 0; i < NUM_PART; ++i) {
+							var t = i*STEP;
+							if (t > seg) {
+								--i;
+								++index;
+								seg += len[index];
+								continue;
+							}
+							var pt = (t-seg+len[index])/len[index], p = BCurve(paths[curveIndex][index], pt), t = BCurveDt(paths[curveIndex][index], pt);
+							anchors.push({x: p.x, y: p.y, t: Math.atan2(t.y, t.x)/*+~~(Math.random()*3)*Math.PI*/});
+						}
+						if (shuff)
+							shuffle(anchors);
+						for (var i = 0; i < NUM_PART; ++i)
+							particles[i].a = anchors[i];
+					}
+
+					function BCurveLength(curve, res) { // res should always be greater than curve.length
+						var res = res || curve.length*2, step = 1/res, step2 = step/2;
+						if (curve.length == 2)
+							return dist(curve[0], curve[1]);
+						var lowerBound = 0; // taken by place points along curve
+						for (var i = 1, prev = curve[0], curr; i <= res; ++i, prev = curr) {
+							curr = BCurve(curve, i*step);
+							lowerBound += dist(prev, curr);
+						}
+						var upperBound = 0; // taken by computing the trapezoidal approximation of int(|d/dt| dt) at the same points above. pretty sure this is a lie in higher orders
+						var dt = BCurveDt(curve, 0);
+						upperBound += step2*Math.sqrt(dt.x*dt.x+dt.y*dt.y);
+						dt = BCurveDt(curve, 1);
+						upperBound += step2*Math.sqrt(dt.x*dt.x+dt.y*dt.y);
+						for (var i = 1; i < res; ++i) {
+							dt = BCurveDt(curve, i*step);
+							upperBound += step*Math.sqrt(dt.x*dt.x+dt.y*dt.y);
+						}
+						return (lowerBound+upperBound)/2;
+					}
+					function BCurve(curve, t) {
+						var n = curve.length-1, p = {x: 0, y: 0};
+						for (var i = 0; i <= n; ++i) {
+							var coef = binom(n, i)*Math.pow(1-t, n-i)*Math.pow(t, i);
+							p.x += coef*curve[i].x, p.y += coef*curve[i].y;
+						}
+						return p;
+					}
+					function BCurveDt(curve, t) {
+						var n = curve.length-1, p = {x: 0, y: 0};
+						for (var i = 1, prev = curve[0], curr; i <= n; ++i, prev = curr) {
+							curr = curve[i];
+							var coef = binom(n-1, i-1)*Math.pow(1-t, n-i)*Math.pow(t, i-1);
+							p.x += coef*(curr.x-prev.x), p.y += coef*(curr.y-prev.y);
+						}
+						p.x *= n;
+						p.y *= n;
+						return p;
+					}
+					function binom(n, k) {
+						return factorial(n)/factorial(k)/factorial(n-k);
+					}
+					function factorial(n) {
+						var p = 1;
+						for (var i = 2; i <= n; ++i)
+							p *= i;
+						return p;
+					}
+					function dist(a, b) {
+						var dx = a.x-b.x, dy = a.y-b.y;
+						return Math.sqrt(dx*dx+dy*dy);
+					}
+					function shuffle(array) {
+						var l = array.length, t, i;
+						while (l) {
+							i = ~~(Math.random()*l--);
+							t = array[l];
+							array[l] = array[i];
+							array[i] = t;
+						}
+					}
+
+					initialize("PILLOWFICATION");
+					transition(0);
+					setInterval(function() {
+						transition(++currltr >= paths.length ? (currltr = 0) : currltr);
+					}, 3000)
+
+					$("#canvas").pillowcanvas(function(ctx) {
+						var width = ctx.canvas.width, height = ctx.canvas.height;
+						ctx.clearRect(0, 0, width, height);
+						var cx = width/2, cy = height/2;
+
+						ctx.strokeStyle = "#FFFFFF";
+						for (var i = 0; i < NUM_PART; ++i) {
+							var p = particles[i];
+
+							var dx = p.a.x-p.x, dy = p.a.y-p.y;
+							var factor = Math.pow(Math.E, -Math.sqrt(dx*dx+dy*dy)*5/size)*size/1000;
+							p.x += factor*dx;
+							p.y += factor*dy;
+							var dt = p.a.t-p.t;
+							factor = dt == 0 ? 1 : 1/(dt > 0 ? dt : -dt)/10;
+							if (factor > 1)
+								factor = 1;
+							p.t += factor*dt;
+
+							var ct = 5*Math.cos(p.t), st = 5*Math.sin(p.t);
+							ctx.beginPath();
+							ctx.moveTo(cx+p.x+ct, cy-p.y-st);
+							ctx.lineTo(cx+p.x-ct, cy-p.y+st);
+							ctx.stroke();
+							ctx.closePath();
+						}
+					});
+
+					$("#particles").keyup(function() {
+						NUM_PART = parseInt($(this).val());
+						if (!isFinite(NUM_PART))
+							NUM_PART = 100;
+						STEP = 1/NUM_PART;
+						initialize($("#text").val());
+						transition(0);
+					})
+					$("#text").keyup(function() {
+						initialize($(this).val());
+						transition(0);
+					})
+					$("#size").keyup(function() {
+						size = parseInt($(this).val());
+						if (!isFinite(size))
+							size = 250;
+						initialize($("#text").val());
+						transition(0);
+					})
+					$("#shuffle").change(function() {
+						shuff = $(this).is(":checked");
+					});
+
+					$("#tab").click(function() {
+						$("body").toggleClass("hide");
+						$(window).resize();
+					});
+				}
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<div id="canvas"></div>
+	<div id="options">
+		<p>
+			<span class="label">Particles:</span>
+			<input id="particles" type="number" value="100">
+		</p>
+		<p>
+			<span class="label">Particles:</span>
+			<input id="particles" type="number" value="100">
+		</p>
+		<p>
+			<span class="label">Text:</span>
+			<input id="text" type="text" value="PILLOWFICATION">
+		</p>
+		<p>
+			<span class="label">Size:</span>
+			<input id="size" type="number" value="300">
+		</p>
+		<p>
+			<span class="label">Shuffle:</span>
+			<input id="shuffle" type="checkbox">
+		</p>
+	</div>
+	<div id="tab">
+		<div id="right">\<br>/</div>
+		<div id="left">/<br>\</div>
+	</div>
+</body>
+</html>

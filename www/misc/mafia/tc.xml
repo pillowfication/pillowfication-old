@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<tradingcards>
+  <monstercards>
+    <card>
+      <name>AntiLOL</name>
+      <image>asdf</image>
+      <ability>Deal 800 damage to an opponent's card when played.</ability>
+      <flavour>Play to win.</flavour>
+    </card>
+    <card>
+      <name>Bismarck</name>
+      <image>asdf</image>
+      <ability>Heals all your minions for 800HP. Roll a die, if a 6 is not rolled, this card is sent to the graveyard.</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Blackjam</name>
+      <image>http://puu.sh/6E5pV.jpg</image>
+      <ability>asdf</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>BMJ</name>
+      <image>http://puu.sh/6E5cD.jpg</image>
+      <ability>Turn an opponent's card into a potato.</ability>
+      <flavour>CCCCCCCCCCCCCCCCCCC</flavour>
+    </card>
+    <card>
+      <name>BruceWayne</name>
+      <image>http://static1.businessinsider.com/image/526478b5eab8ea2b7f0036a7/this-trailer-for-batman-video-game-arkham-origins-will-pull-at-your-heartstrings.jpg</image>
+      <ability>asdf</ability>
+      <flavour>\"I'm Batman\"</flavour>
+    </card>
+    <card>
+      <name>Brutus</name>
+      <image>asdf</image>
+      <ability>Play Brutus’ Guild Hall automatically when this card is played.</ability>
+      <flavour>\"Buying Incs!\"</flavour>
+    </card>
+    <card>
+      <name>Budar</name>
+      <image>asdf</image>
+      <ability>Flings pieces of shit at the enemy.</ability>
+      <flavour>BUNDO</flavour>
+    </card>
+    <card>
+      <name>Clocking</name>
+      <image>asdf</image>
+      <ability>Turn an opponent's card into an Autistic Dog.</ability>
+      <flavour>Addict.</flavour>
+    </card>
+    <card>
+      <name>Dalla</name>
+      <image>http://i.imgur.com/RCRd6wn.jpg?1</image>
+      <ability>Charges like a bus.</ability>
+      <flavour>\"ANAL ME DALLA\"</flavour>
+    </card>
+    <card>
+      <name>Express</name>
+      <image>asdf</image>
+      <ability>Puts the fork in the garbage disposal.</ability>
+      <flavour>\"Express... your sister is phat. Not fat. Phat, with a P H.\"</flavour>
+    </card>
+    <card>
+      <name>Fkitty</name>
+      <image>http://1.bp.blogspot.com/-jmGTdUd3XCw/SwDX4zvpyBI/AAAAAAAAAEo/cGOtdOHO0uc/s400/mafia%2Bcat%2B2.jpg</image>
+      <ability>Attaches to Russian MAFIA. You can play any card half price.</ability>
+      <flavour>*Meow*</flavour>
+    </card>
+    <card>
+      <name>Fluffy Muffins</name>
+      <image>http://i.imgur.com/C3eEAne.jpg</image>
+      <ability>Beats up cupcakes.</ability>
+      <flavour>What's your type of muffin?</flavour>
+    </card>
+    <card>
+      <name>GOJIRA</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Hydralisk</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>Get a Mic Bro.</flavour>
+    </card>
+    <card>
+      <name>iPopsicle</name>
+      <image>http://puu.sh/6E52w.jpg</image>
+      <ability>⅚ chance of losing all cards.</ability>
+      <flavour>The Best Duper.</flavour>
+    </card>
+    <card>
+      <name>Kalle</name>
+      <image>http://i.imgur.com/a35zJbC.jpg</image>
+      <ability>Lose your social skills, become hardcore gamer.</ability>
+      <flavour>Bald Eagle.</flavour>
+    </card>
+    <card>
+      <name>Khorde</name>
+      <image>asdf</image>
+      <ability>Nullifies Thessal.</ability>
+      <flavour>dicks</flavour>
+    </card>
+    <card>
+      <name>Lore</name>
+      <image>asdf</image>
+      <ability>Goes to get coffee, never comes back.</ability>
+      <flavour>\"What?\"</flavour>
+    </card>
+    <card>
+      <name>MacBeth</name>
+      <image>http://puu.sh/6ER7p.png</image>
+      <ability>Becomes salty for five turns.</ability>
+      <flavour>\"Get off the bag!\"</flavour>
+    </card>
+    <card>
+      <name>Mithechoir</name>
+      <image>asdf</image>
+      <ability>Steals cards from the other players deck.</ability>
+      <flavour>\"I have a good job and no life.\"</flavour>
+    </card>
+    <card>
+      <name>Peth</name>
+      <image>http://i.imgur.com/tg4HDKr.jpg</image>
+      <ability>+10 Gold</ability>
+      <flavour>\"I won the game guys.\"</flavour>
+    </card>
+    <card>
+      <name>Pillow</name>
+      <image>http://i.imgur.com/kIh5GEi.jpg</image>
+      <ability>Replaces opponent's hand with ASCII art.</ability>
+      <flavour><![CDATA[<3 Onii-chan~ daisuki!!<br><span style='font-style:normal'>(づ￣ ³￣)づ</span>]]></flavour>
+    </card>
+    <card>
+      <name>Rilr</name>
+      <image>asdf</image>
+      <ability>sdf</ability>
+      <flavour>sdf</flavour>
+    </card>
+    <card>
+      <name>Ryu</name>
+      <image>http://www.burdr.com/wp-content/uploads/2011/06/bird-with-arms-17.jpg</image>
+      <ability>Makes people's dicks soft.</ability>
+      <flavour>\"I'm sick of your shit.\"</flavour>
+    </card>
+    <card>
+      <name>Shogolo</name>
+      <image>http://puu.sh/6GEez.jpg</image>
+      <ability>Spams you with camel pics taking up your bandwidth, lose one turn</ability>
+      <flavour>Wanna buy camel?</flavour>
+    </card>
+    <card>
+      <name>Straasha</name>
+      <image>asdf</image>
+      <ability>sdf</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Stupidity</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Supersteve</name>
+      <image>asdf</image>
+      <ability>Disappear. Becomes bum for 5 turns.</ability>
+      <flavour>SUPER STEEEEEEVE</flavour>
+    </card>
+    <card>
+      <name>Tanst</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>Vanilia</flavour>
+    </card>
+    <card>
+      <name>Tatsume</name>
+      <image>asdf</image>
+      <ability>sdf</ability>
+      <flavour>XdallaPLZ</flavour>
+    </card>
+    <card>
+      <name>TheOneWho</name>
+      <image>asdf</image>
+      <ability>AFK at any point during the game, this card will be unable to do any damage or receive damage</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Tipsylama</name>
+      <image>asdf</image>
+      <ability>Hurls abuse at 2 opposing cards.</ability>
+      <flavour>\"Cunt\"</flavour>
+    </card>
+    <card>
+      <name>Tony</name>
+      <image>asdf</image>
+      <ability>Silences all rogues.</ability>
+      <flavour>Rogue Level: TonyDee</flavour>
+    </card>
+    <card>
+      <name>Trent</name>
+      <image>asdf</image>
+      <ability>Shovel. Digs a random card out of the graveyard.</ability>
+      <flavour>\"Hey... wanna buy this shovel?\"</flavour>
+    </card>
+    <card>
+      <name>Trevor</name>
+      <image>asdf</image>
+      <ability>Does not look at you when you’re talking to him.</ability>
+      <flavour>*Chewing noises*</flavour>
+    </card>
+    <card>
+      <name>Wladex</name>
+      <image>asdf</image>
+      <ability>Racism</ability>
+      <flavour>Has black people in his family tree. They're still hanging there.</flavour>
+    </card>
+    <card>
+      <name>Worldwide</name>
+      <image>asdf</image>
+      <ability>Summoned for half cost if Kalle is played.</ability>
+      <flavour>Is actually Kalle's Alt!</flavour>
+    </card>
+    <card>
+      <name>Xdalla</name>
+      <image>asdf</image>
+      <ability>Stuns Everything</ability>
+      <flavour>\"I Close My Eyes... Only for a moment, and Khorde’s knight is gone\"</flavour>
+    </card>
+    <card>
+      <name>XxDRAGONxX</name>
+      <image>http://puu.sh/6ERDw.png</image>
+      <ability>asdf</ability>
+      <flavour>Fake and gay</flavour>
+    </card>
+    <card>
+      <name>YARRRRR</name>
+      <image>asdf</image>
+      <ability>Perform awesome drum solo.</ability>
+      <flavour>\"I fucked your dad.\"</flavour>
+    </card>
+    <card>
+      <name>zxcv</name>
+      <image>http://static4.wikia.nocookie.net/__cb20121118231614/althistory/images/thumb/d/d7/Canadian-Flag.jpg/640px-Canadian-Flag.jpg</image>
+      <ability>eat pretzels loudly in your opponent's ears for two turns</ability>
+      <flavour>\"I'm not canadian\"</flavour>
+    </card>
+  </monstercards>
+  <spellcards>
+    <card>
+      <name>Batcave</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>BMJ's Dagger</name>
+      <image>asdf</image>
+      <ability>Turns BMJ into a Demi God BMJ.</ability>
+      <flavour>Aesthetics brah.</flavour>
+    </card>
+    <card>
+      <name>Brutus' Guild Hall</name>
+      <image>asdf</image>
+      <ability>Cards cost 1 more to play</ability>
+      <flavour>Has anything changed since I was gone?</flavour>
+    </card>
+    <card>
+      <name>Bunnings</name>
+      <image>asdf</image>
+      <ability>Spawns Trent</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Dalla's Whisper</name>
+      <image>asdf</image>
+      <ability>Confuses an enemy, deals damage to self.</ability>
+      <flavour>BAA</flavour>
+    </card>
+    <card>
+      <name>Fork in the Garbage Disposal</name>
+      <image>asdf</image>
+      <ability>Enemy players loses their contacts. Go again.</ability>
+      <flavour>Kalle approves</flavour>
+    </card>
+    <card>
+      <name>Ghost Ship</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Kalle's Channel</name>
+      <image>http://puu.sh/6E56h.png</image>
+      <ability>Silences game field.</ability>
+      <flavour>...</flavour>
+    </card>
+    <card>
+      <name>Trusted Guild Hall</name>
+      <image>asdf</image>
+      <ability>Discard a card, draw another.</ability>
+      <flavour>Pillow</flavour>
+    </card>
+    <card>
+      <name>Wine Cellar</name>
+      <image>asdf</image>
+      <ability>Draw an extra card at the start of your turn.</ability>
+      <flavour>TY BRUTUS!</flavour>
+    </card>
+  </spellcards>
+  <equipcards>
+    <card>
+      <name>Bismarck's Spirit Salve</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Crusty Fleshlight</name>
+      <image>asdf</image>
+      <ability>If Kalle is played, give Lore 800 DEF.</ability>
+      <flavour>Kalle's Fleshlight has gone through some tough times...</flavour>
+    </card>
+    <card>
+      <name>Dirk</name>
+      <image>asdf</image>
+      <ability>Swap with any other card</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Indeed...</name>
+      <image>asdf</image>
+      <ability>Makes you concentrate too much on one thing. Lose your next turn.</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Kalle's Crab</name>
+      <image>asdf</image>
+      <ability>Summons 5 Unmaxed Assassins when Kalle is Played.</ability>
+      <flavour>Hey Kalle, try running in with all your assassins at the same time!</flavour>
+    </card>
+    <card>
+      <name>Kalle's Hair</name>
+      <image>asdf</image>
+      <ability>is an illusion causing you to lose your turn</ability>
+      <flavour>asdf</flavour>
+    </card>
+    <card>
+      <name>Mayo and Cheese</name>
+      <image>asdf</image>
+      <ability>asdf</ability>
+      <flavour>You have like... Cheese... and Mayonnaise.</flavour>
+    </card>
+    <card>
+      <name>Mike Seller's Numbers</name>
+      <image>asdf</image>
+      <ability>Silences your opponents.</ability>
+      <flavour>\"Fuck your argument\"</flavour>
+    </card>
+    <card>
+      <name>Mithril Sword</name>
+      <image>asdf</image>
+      <ability>Gives Khorde 1200 ATK</ability>
+      <flavour>MITHRIIIIIILLLLL *Guitar Solo*</flavour>
+    </card>
+    <card>
+      <name>WhiteOcean</name>
+      <image>http://imgur.com/vcONOi6</image>
+      <ability>asdf</ability>
+      <flavour>Fri Itins Pls.</flavour>
+    </card>
+    <card>
+      <name>YARRRRR's Link</name>
+      <image>sdf</image>
+      <ability>blinds two random monsters</ability>
+      <flavour>asdf</flavour>
+    </card>
+  </equipcards>
+</tradingcards>

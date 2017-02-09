@@ -1,0 +1,92 @@
+<html>
+<head>
+  <link href="http://fonts.googleapis.com/css?family=Aldrich|Jockey+One" rel="stylesheet" type="text/css" />
+  <style type="text/css">
+    div#saltPoster
+    {
+      border: solid 2px #fff;
+      background: #000 url(http://i.imgur.com/sNxjR.png) no-repeat bottom center;
+      color: #fff;
+      font-family: 'Aldrich', sans-serif;
+      height: 280px;
+      margin: 230 auto;
+      padding: 140px 0 0 0;
+      position: relative;
+      text-align: center;
+      width: 325px;
+    }
+    div#saltPoster #name, 
+    div#saltPoster #slogan, 
+    div#saltPoster #date, 
+    div#saltPoster #site, 
+    div#saltPoster #actor
+    {
+      padding: 0;
+      position: relative;
+      text-align:center;
+      text-transform: uppercase;
+    }
+    div#saltPoster #name
+    {
+      font-weight: bold;
+      font-size: 40px;
+      letter-spacing: 20px;
+    }
+    div#saltPoster #name:before
+    {
+      color: rgba(255, 255, 255, 0.2);
+      content: attr(data-one);
+      font: bold 150px 'Jockey One', sans-serif;
+      left: -60px;
+      letter-spacing: 5px;
+      position: absolute;
+      text-transform: uppercase;
+      top: -60px;
+    }
+    div#saltPoster #slogan
+    {
+      display: block;
+      font-size: 12px;
+      padding: 130px 0 0 0;
+      letter-spacing: 5px;
+    }
+    div#saltPoster #date
+    {
+      display: block;
+      font-size: 10px;
+      margin: 0;
+      padding: 50px 0 0 0;
+      letter-spacing: 4px;
+    }
+    div#saltPoster #site
+    {
+      display: block;
+      font-size: 8px;
+      letter-spacing: 2px;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      text-align:center;
+    }
+    div#saltPoster #actor
+    {
+      font-size: 16px;
+      left: 35px;
+      letter-spacing: 8px;
+      position: absolute;
+      text-align: center;
+      top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="saltPoster">
+   <span id="name" data-one="salty">salty</span>
+   <span id="slogan">who is salty?</span>
+   <span id="date">summer 2010</span>
+   <span id="site">WhoIsSalty.com</span>
+   <span id="actor">Mcbeth MorbidE</span>
+  </div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+@font-face {font-family: COUTURE; src: url(COUTURE-Bold.ttf)}
+.card {z-index: auto; display: inline-block; position: relative; font-family: "Times New Roman", serif; font-size: 16px; color: #000000; cursor: pointer; perspective: 700px; -webkit-perspective: 700px;          margin: 15px}
+.card .front, .card .back {width: 250px; height: 400px; border: 2px solid #000000; border-radius: 6px;
+  transition: transform .2s; -ms-transition: -ms-transform .2s; -webkit-transition: -webkit-transform .2s}
+.card .front {background-color: #555555; overflow: hidden; transform: rotateY(0deg); -ms-transform: rotateY(0deg); -webkit-transform: rotateY(0deg); transition-delay: .2s; -webkit-transition-delay: .2s}
+.card.original .front {border-color: #FFD700}
+.card .back  {position: absolute; top: 0px; left: 0px; background-color: #121212; background-image: url('mtcbg_s.png'); background-position: center center; background-repeat: no-repeat;
+  transform: rotateY(-90deg); -ms-transform: rotateY(-90deg); -webkit-transform: rotateY(-90deg)}
+.card.spell .back {background-color: #555500}
+.card.equip .back {background-color: #005555}
+.card .name  {height: 38px; margin: 6px 12px; line-height: 38px; text-align: right; font-family: COUTURE; font-size: 22px; color: #EFEFEF}
+.card .image {height: 200px; margin: 6px 12px; border: 1px solid #000000; background-size: cover; background-position: center center; background-repeat: no-repeat}
+.card .text  {margin: 6px 12px; padding: 6px; background-color: #777777; text-align: left}
+.card .ability {}
+.card .flavour {font-style: italic}
+
+.card.flipped .front {transform: rotateY(90deg); -ms-transform: rotateY(90deg); -webkit-transform: rotateY(90deg); transition-delay: 0s; -webkit-transition-delay: 0s}
+.card.flipped .back  {transform: rotateY(0deg); -ms-transform: rotateY(0deg); -webkit-transform: rotateY(0deg); transition-delay: .2s; -webkit-transition-delay: .2s}
+
+.card.dragging {z-index: 99}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Delaunay</title>
+	<style>
+		html, body {width: 100%; height: 100%; margin: 0px; border: 0px; padding: 0px}
+	</style>
+	<script src="../../assets/js/jquery.js"></script>
+	<script src="../../assets/js/pillow/pfcanvas.js"></script>
+	<script src="../../assets/js/pillow/pfpoisson.js"></script>
+	<script src="../../assets/js/pillow/pfdelaunay.js"></script>
+	<script>
+		$(function() {
+			
+			var cx = 0, cy = 0, sides = 4, radius = 500, offset = Math.PI/4;
+			var domain = [];
+			for (var i = 0; i < sides; ++i) {
+				var theta = (Math.PI*2/sides)*i+offset;
+				domain.push({x: radius*Math.cos(theta), y: radius*Math.sin(theta)});
+			}
+			var points = poisson(domain, 20, domain);
+			
+			/*
+			var cell = 25, dx = 500, dy = 400;
+			var points = [];
+			for (var X = -dx; X <= dx; X += cell)
+				for (var Y = -dy; Y <= dy; Y += cell)
+					points.push({x: X, y: Y});
+			
+			/*
+			var dx = 1000, dy = 1000, num = 1000;
+			var points = [];
+			var hdx = dx >> 1, hdy = dy >> 1;
+			for (var i = 0; i < num; ++i)
+				points.push({x: Math.random()*dx-hdx, y: Math.random()*dy-hdy});
+			*/
+
+			var triang = delaunay(points);
+
+			
+			var colors = [];
+			for (var i = 0; i < triang.length; ++i) {
+				var c = ("0"+(256*Math.random()|0).toString(16)).slice(-2);
+				colors.push("#"+c+c+"FF");
+			}
+			
+			/*
+			var pcolors = [], colors = [];
+			for (var i = 0; i < points.length; ++i)
+				pcolors.push(Math.pow(Math.random(), .8));
+			for (var i = 0; i < triang.length; ++i) {
+				var t = triang[i];
+				var c = ("0"+((pcolors[t[0]]+pcolors[t[1]]+pcolors[t[2]])*256/3|0).toString(16)).slice(-2);
+				colors.push("#"+c+c+"FF");
+			}
+			*/
+
+			$("body").pillowcanvas(function(ctx) {
+				var x = ctx.canvas.width/2, y = ctx.canvas.height/2;
+				for (var i = 0; i < triang.length; ++i) {
+					var t = triang[i], a = points[t[0]], b = points[t[1]], c = points[t[2]];
+					ctx.fillStyle = colors[i];
+					ctx.beginPath();
+					ctx.moveTo(x+a.x, y-a.y);
+					ctx.lineTo(x+b.x, y-b.y);
+					ctx.lineTo(x+c.x, y-c.y);
+					ctx.fill();
+					ctx.closePath();
+				}
+			});
+		});
+	</script>
+</head>
+
+<body>
+</body>
+</html>

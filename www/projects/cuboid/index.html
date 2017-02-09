@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Cuboid</title>
+	<style>
+		body    {padding: 0px 50px 20px}
+		section {overflow: hidden}
+		table   {text-align: center}
+		#vars table td {width: 40px}
+		hr      {margin: 25px 0px}
+		#calc, #steps, #vars {float: left; margin-left: 50px; padding-bottom: 30px; width: 30%; min-width: 400px; max-width: 100%}
+		#equiv span:hover, #results span:hover, #steps span:not(:last-child):hover, #d2 span:hover {color: #FF0000; cursor: pointer}
+	</style>
+	<script src="../../assets/js/jquery.js"></script>
+	<script>
+		var tri = [[0, 1, 3],  // a b d
+		           [0, 2, 4],  // a c e
+		           [1, 2, 5],  // b c f
+		           [0, 5, 6],  // a f g
+		           [1, 4, 6],  // b e g
+		           [2, 3, 6]]; // c d g
+		var tab = [
+			// xN
+			[
+				[[], [2, 0, -1]],          // set c odd
+				[[[0, 0, -1]], [1, 0, 1]], // if a odd, set b even
+				[[[0, 0, 1]], [1, 0, -1]], // if a even, set b odd
+				[[[1, 0, -1]], [0, 0, 1]], // if b odd, set a even
+				[[[1, 0, 1]], [0, 0, -1]], // if b even, set a odd
+				[[[0, 0, 1]], [0, 2, 1]],  // if a even, set a d4
+				[[[1, 0, 1]], [1, 2, 1]],  // if b even, set b d4
+				[[[0, 2, 1]], [0, 0, 1]],  // if a d4, set a even
+				[[[1, 2, 1]], [1, 0, 1]],  // if b d4, set b even
+				[[[0, 1, 1]], [1, 1, -1]], // if a d3, set b not d3
+				[[[0, 1, -1]], [1, 1, 1]], // if a not d3, set b d3
+				[[[1, 1, 1]], [0, 1, -1]], // if b d3, set a not d3
+				[[[1, 1, -1]], [0, 1, 1]], // if b not d3, set a d3
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]], // if b not d4, set a d4
+				[[[0, 3, 1]], [1, 3, -1]], // if a d5, set b not d5
+				[[[0, 3, 1]], [2, 3, -1]], // if a d5, set c not d5
+				[[[1, 3, 1]], [0, 3, -1]], // if b d5, set a not d5
+				[[[1, 3, 1]], [2, 3, -1]], // if b d5, set c not d5
+				[[[2, 3, 1]], [0, 3, -1]], // if c d5, set a not d5
+				[[[2, 3, 1]], [1, 3, -1]], // if c d5, set b not d5
+				[[[0, 3, -1], [1, 3, -1]], [2, 3, 1]], // if a not d5 AND b not d5, set c d5
+				[[[0, 3, -1], [2, 3, -1]], [1, 3, 1]], // if a not d5 AND c not d5, set b d5
+				[[[1, 3, -1], [2, 3, -1]], [0, 3, 1]]  // if b not d5 AND c not d5, set a d5
+			],
+			// x2
+			[
+				[[], [0, 0, 1]],           // set a even
+				[[], [1, 0, 1]],           // set b even
+				[[], [2, 0, 1]],           // set c even
+				[[[0, 1, 1]], [1, 1, -1]], // if a d3, set b not d3
+				[[[0, 1, -1]], [1, 1, 1]], // if a not d3, set b d3
+				[[[1, 1, 1]], [0, 1, -1]], // if b d3, set a not d3
+				[[[1, 1, -1]], [0, 1, 1]], // if b not d3, set a d3
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]], // if b not d4, set a d4
+				[[[0, 3, 1]], [1, 3, -1]], // if a d5, set b not d5
+				[[[0, 3, 1]], [2, 3, -1]], // if a d5, set c not d5
+				[[[1, 3, 1]], [0, 3, -1]], // if b d5, set a not d5
+				[[[1, 3, 1]], [2, 3, -1]], // if b d5, set c not d5
+				[[[2, 3, 1]], [0, 3, -1]], // if c d5, set a not d5
+				[[[2, 3, 1]], [1, 3, -1]], // if c d5, set b not d5
+				[[[0, 3, -1], [1, 3, -1]], [2, 3, 1]], // if a not d5 AND b not d5, set c d5
+				[[[0, 3, -1], [2, 3, -1]], [1, 3, 1]], // if a not d5 AND c not d5, set b d5
+				[[[1, 3, -1], [2, 3, -1]], [0, 3, 1]]  // if b not d5 AND c not d5, set a d5
+			],
+			// x3
+			[
+				[[], [2, 0, -1]],          // set c odd
+				[[], [0, 1, 1]],           // set a d3
+				[[], [1, 1, 1]],           // set b d3
+				[[], [2, 1, 1]],           // set c d3
+				[[[0, 0, -1]], [1, 0, 1]], // if a odd, set b even
+				[[[0, 0, 1]], [1, 0, -1]], // if a even, set b odd
+				[[[1, 0, -1]], [0, 0, 1]], // if b odd, set a even
+				[[[1, 0, 1]], [0, 0, -1]], // if b even, set a odd
+				[[[0, 0, 1]], [0, 2, 1]],  // if a even, set a d4
+				[[[1, 0, 1]], [1, 2, 1]],  // if b even, set b d4
+				[[[0, 2, 1]], [0, 0, 1]],  // if a d4, set a even
+				[[[1, 2, 1]], [1, 0, 1]],  // if b d4, set b even
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]], // if b not d4, set a d4
+				[[[0, 3, 1]], [1, 3, -1]], // if a d5, set b not d5
+				[[[0, 3, 1]], [2, 3, -1]], // if a d5, set c not d5
+				[[[1, 3, 1]], [0, 3, -1]], // if b d5, set a not d5
+				[[[1, 3, 1]], [2, 3, -1]], // if b d5, set c not d5
+				[[[2, 3, 1]], [0, 3, -1]], // if c d5, set a not d5
+				[[[2, 3, 1]], [1, 3, -1]], // if c d5, set b not d5
+				[[[0, 3, -1], [1, 3, -1]], [2, 3, 1]], // if a not d5 AND b not d5, set c d5
+				[[[0, 3, -1], [2, 3, -1]], [1, 3, 1]], // if a not d5 AND c not d5, set b d5
+				[[[1, 3, -1], [2, 3, -1]], [0, 3, 1]]  // if b not d5 AND c not d5, set a d5
+			],
+			// x4
+			[
+				[[], [0, 0, 1]],           // set a even
+				[[], [1, 0, 1]],           // set b even
+				[[], [2, 0, 1]],           // set c even
+				[[], [0, 2, 1]],           // set a d4
+				[[], [1, 2, 1]],           // set b d4
+				[[], [2, 2, 1]],           // set c d4
+				[[[0, 1, 1]], [1, 1, -1]], // if a d3, set b not d3
+				[[[0, 1, -1]], [1, 1, 1]], // if a not d3, set b d3
+				[[[1, 1, 1]], [0, 1, -1]], // if b d3, set a not d3
+				[[[1, 1, -1]], [0, 1, 1]], // if b not d3, set a d3
+				[[[0, 3, 1]], [1, 3, -1]], // if a d5, set b not d5
+				[[[0, 3, 1]], [2, 3, -1]], // if a d5, set c not d5
+				[[[1, 3, 1]], [0, 3, -1]], // if b d5, set a not d5
+				[[[1, 3, 1]], [2, 3, -1]], // if b d5, set c not d5
+				[[[2, 3, 1]], [0, 3, -1]], // if c d5, set a not d5
+				[[[2, 3, 1]], [1, 3, -1]], // if c d5, set b not d5
+				[[[0, 3, -1], [1, 3, -1]], [2, 3, 1]], // if a not d5 AND b not d5, set c d5
+				[[[0, 3, -1], [2, 3, -1]], [1, 3, 1]], // if a not d5 AND c not d5, set b d5
+				[[[1, 3, -1], [2, 3, -1]], [0, 3, 1]]  // if b not d5 AND c not d5, set a d5
+			],
+			// x5
+			[
+				[[], [2, 0, -1]],          // set c odd
+				[[], [0, 3, 1]],           // set a d5
+				[[], [1, 3, 1]],           // set b d5
+				[[], [2, 3, 1]],           // set c d5
+				[[[0, 0, -1]], [1, 0, 1]], // if a odd, set b even
+				[[[0, 0, 1]], [1, 0, -1]], // if a even, set b odd
+				[[[1, 0, -1]], [0, 0, 1]], // if b odd, set a even
+				[[[1, 0, 1]], [0, 0, -1]], // if b even, set a odd
+				[[[0, 0, 1]], [0, 2, 1]],  // if a even, set a d4
+				[[[1, 0, 1]], [1, 2, 1]],  // if b even, set b d4
+				[[[0, 2, 1]], [0, 0, 1]],  // if a d4, set a even
+				[[[1, 2, 1]], [1, 0, 1]],  // if b d4, set b even
+				[[[0, 1, 1]], [1, 1, -1]], // if a d3, set b not d3
+				[[[0, 1, -1]], [1, 1, 1]], // if a not d3, set b d3
+				[[[1, 1, 1]], [0, 1, -1]], // if b d3, set a not d3
+				[[[1, 1, -1]], [0, 1, 1]], // if b not d3, set a d3
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]]  // if b not d4, set a d4
+			],
+			// x2 x3
+			[
+				[[], [0, 0, 1]],           // set a even
+				[[], [1, 0, 1]],           // set b even
+				[[], [2, 0, 1]],           // set c even
+				[[], [0, 1, 1]],           // set a d3
+				[[], [1, 1, 1]],           // set b d3
+				[[], [2, 1, 1]],           // set c d3
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]], // if b not d4, set a d4
+				[[[0, 3, 1]], [1, 3, -1]], // if a d5, set b not d5
+				[[[0, 3, 1]], [2, 3, -1]], // if a d5, set c not d5
+				[[[1, 3, 1]], [0, 3, -1]], // if b d5, set a not d5
+				[[[1, 3, 1]], [2, 3, -1]], // if b d5, set c not d5
+				[[[2, 3, 1]], [0, 3, -1]], // if c d5, set a not d5
+				[[[2, 3, 1]], [1, 3, -1]], // if c d5, set b not d5
+				[[[0, 3, -1], [1, 3, -1]], [2, 3, 1]], // if a not d5 AND b not d5, set c d5
+				[[[0, 3, -1], [2, 3, -1]], [1, 3, 1]], // if a not d5 AND c not d5, set b d5
+				[[[1, 3, -1], [2, 3, -1]], [0, 3, 1]]  // if b not d5 AND c not d5, set a d5
+			],
+			// x2 x5
+			[
+				[[], [0, 0, 1]],           // set a even
+				[[], [1, 0, 1]],           // set b even
+				[[], [2, 0, 1]],           // set c even
+				[[], [0, 3, 1]],           // set a d5
+				[[], [1, 3, 1]],           // set b d5
+				[[], [2, 3, 1]],           // set c d5
+				[[[0, 1, 1]], [1, 1, -1]], // if a d3, set b not d3
+				[[[0, 1, -1]], [1, 1, 1]], // if a not d3, set b d3
+				[[[1, 1, 1]], [0, 1, -1]], // if b d3, set a not d3
+				[[[1, 1, -1]], [0, 1, 1]], // if b not d3, set a d3
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]]  // if b not d4, set a d4
+			],
+			// x3 x4
+			[
+				[[], [0, 0, 1]],           // set a even
+				[[], [1, 0, 1]],           // set b even
+				[[], [2, 0, 1]],           // set c even
+				[[], [0, 1, 1]],           // set a d3
+				[[], [1, 1, 1]],           // set b d3
+				[[], [2, 1, 1]],           // set c d3
+				[[], [0, 2, 1]],           // set a d4
+				[[], [1, 2, 1]],           // set b d4
+				[[], [2, 2, 1]],           // set c d4
+				[[[0, 3, 1]], [1, 3, -1]], // if a d5, set b not d5
+				[[[0, 3, 1]], [2, 3, -1]], // if a d5, set c not d5
+				[[[1, 3, 1]], [0, 3, -1]], // if b d5, set a not d5
+				[[[1, 3, 1]], [2, 3, -1]], // if b d5, set c not d5
+				[[[2, 3, 1]], [0, 3, -1]], // if c d5, set a not d5
+				[[[2, 3, 1]], [1, 3, -1]], // if c d5, set b not d5
+				[[[0, 3, -1], [1, 3, -1]], [2, 3, 1]], // if a not d5 AND b not d5, set c d5
+				[[[0, 3, -1], [2, 3, -1]], [1, 3, 1]], // if a not d5 AND c not d5, set b d5
+				[[[1, 3, -1], [2, 3, -1]], [0, 3, 1]]  // if b not d5 AND c not d5, set a d5
+			],
+			// x3 x5
+			[
+				[[], [2, 0, -1]],          // set c odd
+				[[], [0, 1, 1]],           // set a d3
+				[[], [1, 1, 1]],           // set b d3
+				[[], [2, 1, 1]],           // set c d3
+				[[], [0, 3, 1]],           // set a d5
+				[[], [1, 3, 1]],           // set b d5
+				[[], [2, 3, 1]],           // set c d5
+				[[[0, 0, -1]], [1, 0, 1]], // if a odd, set b even
+				[[[0, 0, 1]], [1, 0, -1]], // if a even, set b odd
+				[[[1, 0, -1]], [0, 0, 1]], // if b odd, set a even
+				[[[1, 0, 1]], [0, 0, -1]], // if b even, set a odd
+				[[[0, 0, 1]], [0, 2, 1]],  // if a even, set a d4
+				[[[1, 0, 1]], [1, 2, 1]],  // if b even, set b d4
+				[[[0, 2, 1]], [0, 0, 1]],  // if a d4, set a even
+				[[[1, 2, 1]], [1, 0, 1]],  // if b d4, set b even
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]]  // if b not d4, set a d4
+			],
+			// x4 x5
+			[
+				[[], [0, 0, 1]],           // set a even
+				[[], [1, 0, 1]],           // set b even
+				[[], [2, 0, 1]],           // set c even
+				[[], [0, 2, 1]],           // set a d4
+				[[], [1, 2, 1]],           // set b d4
+				[[], [2, 2, 1]],           // set c d4
+				[[], [0, 3, 1]],           // set a d5
+				[[], [1, 3, 1]],           // set b d5
+				[[], [2, 3, 1]],           // set c d5
+				[[[0, 1, 1]], [1, 1, -1]], // if a d3, set b not d3
+				[[[0, 1, -1]], [1, 1, 1]], // if a not d3, set b d3
+				[[[1, 1, 1]], [0, 1, -1]], // if b d3, set a not d3
+				[[[1, 1, -1]], [0, 1, 1]]  // if b not d3, set a d3
+			],
+			// x2 x3 x5
+			[
+				[[], [0, 0, 1]],           // set a even
+				[[], [1, 0, 1]],           // set b even
+				[[], [2, 0, 1]],           // set c even
+				[[], [0, 1, 1]],           // set a d3
+				[[], [1, 1, 1]],           // set b d3
+				[[], [2, 1, 1]],           // set c d3
+				[[], [0, 3, 1]],           // set a d5
+				[[], [1, 3, 1]],           // set b d5
+				[[], [2, 3, 1]],           // set c d5
+				[[[0, 2, 1]], [1, 2, -1]], // if a d4, set b not d4
+				[[[0, 2, -1]], [1, 2, 1]], // if a not d4, set b d4
+				[[[1, 2, 1]], [0, 2, -1]], // if b d4, set a not d4
+				[[[1, 2, -1]], [0, 2, 1]]  // if b not d4, set a d4
+			],
+			// x3 x4 x5
+			[
+				[[], [0, 0, 1]], // set a even
+				[[], [1, 0, 1]], // set b even
+				[[], [2, 0, 1]], // set c even
+				[[], [0, 1, 1]], // set a d3
+				[[], [1, 1, 1]], // set b d3
+				[[], [2, 1, 1]], // set c d3
+				[[], [0, 2, 1]], // set a d4
+				[[], [1, 2, 1]], // set b d4
+				[[], [2, 2, 1]], // set c d4
+				[[], [0, 3, 1]], // set a d5
+				[[], [1, 3, 1]], // set b d5
+				[[], [2, 3, 1]]  // set c d5
+			]
+		];
+
+var test;
+
+		var sN = ["a", "b", "c", "d", "e", "f", "g"];
+		var sT = ["(a, b, d)", "(a, c, e)", "(b, c, f)", "(a, f, g)", "(b, e, g)", "(c, d, g)"];
+		var sC = ["xN", "x2", "x3", "x4", "x5", "x2 x3", "x2 x5", "x3 x4", "x3 x5", "x4 x5", "x2 x3 x5", "x3 x4 x5"];
+		var sP = ["Parity", "Div. 3", "Div. 4", "Div. 5"];
+		var eq = [[0, 1, 2, 3, 4, 5], [2, 0, 1, 4, 5, 3], [1, 2, 0, 5, 3, 4], [1, 0, 2, 3, 5, 4], [2, 1, 0, 5, 4, 3], [0, 2, 1, 4, 3, 5]];
+		var d2 = [, 0, , 1, , 2, 4, 5, , 6, 8, 10];
+		var d345 = [[, , 0, , , 1, , 3, 4, , 6, 9], [, , , 0, , , , 2, , 4, , 8], [, , , , 0, , 1, , 2, 3, 5, 7]];
+
+		function validate(c) {                                        // Let c be the case to check as an array
+			var b, d, i, j, k, l, n = [], r, t;
+			for (i = 0; i < 7; ++i)                                   // For each of the numbers
+				n[i] = [0, 0, 0, 0];                                  //   Initialize all properties to unknown
+			v: while (true) {                                         // Do repeatedly until no new facts can be found, or contradiction is reached
+				for (i = 0; i < 6; ++i) {                             //   For each of the triplets
+					t = tri[i], b = tab[c[i]];                        //     Let t be the triplet to check, and b the associated table of rules
+					r: for (j = 0, l = b.length; j < l; ++j) {        //     For each rule in b
+						r = b[j];                                     //       Let r be the rule
+						for (k = 0; k < r[0].length; ++k) {           //       For each condition in r[0]
+							d = r[0][k];                              //         Let d be the condition
+							if (n[t[d[0]]][d[1]] != d[2])             //         If the condition is not met
+								continue r;                           //           Continue to the next rule
+						}                                             //       Passing this point means all conditions are met
+						r = r[1], d = r[1], k = r[2], r = n[t[r[0]]]; //       Let r be the data to update, and r = [r, d, k]
+						if (r[d]) {                                   //       If d is already set
+							if (r[d] != k)                            //         If d is a contradiction
+								return false;                         //           Return false, contradiction
+						} else {                                      //       If d is not set
+							r[d] = k;                                 //         Set d to k
+							continue v;                               //         Restart validation
+						}                                             //       Passing this point means this rule gave no new info
+					}                                                 //     Passing this point means all rules gave no new info
+				}                                                     //   Passing this point means all triplets gave no new info
+				return true;                                          //   Return true, no contradiction reached
+			}
+		}
+		function validateV(c, s) {
+			var b, d, i, j, k, l, n = [], r, t, w = 0, x, y, z;
+			for (i = 0; i < 7; ++i)
+				n[i] = [0, 0, 0, 0];
+			v: while (true) {
+				for (i = 0; i < 6; ++i) {
+					x = sT[i]+" is "+sC[c[i]], t = tri[i], b = tab[c[i]];
+					r: for (j = 0, l = b.length; j < l; ++j) {
+						y = "", r = b[j];
+						for (k = 0; k < r[0].length; ++k) {
+							d = r[0][k];
+							y += (y ? " and " : "")+str(t[d[0]], d[1], d[2]);
+							if (n[t[d[0]]][d[1]] != d[2])
+								continue r;
+						}
+						r = r[1], d = r[1], k = r[2], z = x+": "+(y ? y+" -> " : "")+str(t[r[0]], d, k), r = n[t[r[0]]];
+						if (r[d]) {
+							if (r[d] != k)
+								return {stop: -1, message: z, nums: n};
+						} else {
+							r[d] = k;
+							if (w++ == s)
+								return {stop: 0, message: z, nums: n};
+							continue v;
+						}
+					}
+				}
+				return {stop: 1, message: z, nums: n};
+			}
+		}
+
+		function equiv(c) {
+			var a = CtoA(c), r = [], t = [], i, j, v;
+			for (i = 0; i < 6; ++i) {
+				for (j = 0; j < 6; ++j)
+					t[j] = a[eq[i][j]];
+				v = AtoC(t), j = r.length;
+				while (--j >= 0 && r[j] > v);
+				if (typeof r[j] == "undefined" || r[j] != v)
+					r.splice(j+1, 0, v);
+			}
+			return r;
+		}
+		function cases2(c) {
+			var a = CtoA(c), b = [], r = [], i, j, l, d = [];
+			for (i = 0; i < 6; ++i)
+				switch (a[i]) {
+					case 1: case 5: case 6: case 10:
+						a[i] = d2[a[i]];
+						break;
+					case 3: case 7: case 9: case 11:
+						b.push(i);
+						break;
+					default:
+						return r;
+						break;
+				}
+			for (i = 0, l = 1<<b.length; i < l; ++i) {
+				d = a.slice(0);
+				for (j = 0; j < b.length; ++j)
+					if (i>>j&1)
+						d[b[j]] = d2[d[b[j]]];
+				d = AtoC(d);
+				if (d == c)
+					continue;
+				d = equiv(d)[0], j = r.length;
+				while (--j >= 0 && r[j] > d);
+				if (typeof r[j] == "undefined" || r[j] != d)
+					r.splice(j+1, 0, d);
+			}
+			return r;
+		}
+		function cases345(c, d) {
+			var a = CtoA(c), b = d345[d], r = [], i;
+			for (i = 0; i < 6; ++i)
+				if (typeof b[a[i]] == "undefined")
+					return r;
+			for (i = 0; i < 64; ++i) {
+				d = a.slice(0);
+				for (j = 0; j < 6; ++j)
+					if (i>>j&1)
+						d[j] = b[d[j]];
+				d = AtoC(d);
+				if (d == c)
+					continue;
+				d = equiv(d)[0], j = r.length;
+				while (--j >= 0 && r[j] > d);
+				if (typeof r[j] == "undefined" || r[j] != d)
+					r.splice(j+1, 0, d);
+			}
+			return r;
+		}
+
+		function str(n, p, v) { // number, property, value
+			return sN[n]+" "+(p == 0 ? "is "+(v == 1 ? "even" : "odd") : (v == 1 ? "is" : "isn't")+" divisible by "+(p+2));
+		}
+		function CtoA(c) { // case number to case array
+			var a = [], i;
+			for (i = c; i > 0; i = i/12|0)
+				a.push(i%12);
+			for (i = a.length; i < 6; ++i)
+				a.push(0);
+			return a;
+		}
+		function AtoC(a) { // case array to case number
+			var c = 0, e, i;
+			for (i = 0, e = 1; i < 6; ++i, e *= 12)
+				c += a[i]*e;
+			return c;
+		}
+
+		$(function() {
+			$("#case").on("input", function() {
+				var c = parseInt($(this).val()), a = CtoA(c), i;
+				for (i = 0; i < 6; ++i)
+					$("input[name="+i+"][value="+a[i]+"]").prop("checked", true);
+				check(c);
+			});
+			$("input[type=radio]").change(function() {
+				var a = [], c;
+				for (i = 0; i < 6; ++i)
+					a.push(parseInt($("input[name="+i+"]:checked").val()));
+				c = AtoC(a);
+				$("#case").val(c);
+				check(c);
+			});
+			check();
+			function check(c) {
+				var a = CtoA(parseInt($("#case").val())), e = $("#steps"), i = 0, v;
+				$("#equiv").html("<span>"+equiv(c).join("</span>, <span>")+"</span>").find("span").click(function() {
+					$("#case").val(parseInt($(this).html())).trigger("input");
+				});
+				$("#d2").html("<span>"+cases2(c).join("</span>, <span>")+"</span>").find("span").click(function() {
+					$("#case").val(parseInt($(this).html())).trigger("input");
+				});
+				e.html("");
+				while (true) {
+					v = validateV(a, i++);
+					if (v.stop) {
+						if (v.stop == 1)
+							e.append("<span>No Contradictions</span>");
+						else
+							e.append("<span>CONTRADICTION<br>"+v.message+"</span>");
+						break;
+					}
+					e.append("<span>"+i+": "+v.message+"</span><br>");
+				}
+				e.find("span:not(:last-child)").each(function(i) {
+					$(this).click(function() {
+						stats(c, i);
+					});
+				});
+				stats(c, -1);
+			}
+			function stats(c, s) {
+				var n = validateV(CtoA(c), s).nums, t = "<table>", i, j, r;
+				t += "<thead><tr><th></th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th></tr></thead>";
+				for (i = 0; i < 4; ++i) {
+					t += "<tr><td>"+sP[i]+"</td>";
+					for (j = 0; j < 7; ++j)
+						t += "<td>"+(i == 0 ? n[j][i] == 1 ? "Even" : n[j][i] == -1 ? "Odd" : "-" : n[j][i] == 1 ? "Yes" : n[j][i] == -1 ? "No" : "-")+"</td>";
+					t += "</tr>";
+				}
+				$("#vars").html(t+"</tbody></table>");
+			}
+			$("#all").click(function() {
+				var a = [0, 0, 0, 0, 0, 0], i, j, r = [], d, p;
+				for (i = 0; i < 2985984; ++i) {
+					if (equiv(i)[0] == i && validate(a)) // filter unique cases
+						r.push(i);
+					for (j = 0; j < 6; ++j)
+						if (++a[j] == 12)
+							a[j] = 0;
+						else
+							break;
+				}
+				d2: for (i = 0; i < r.length; ++i) {
+					d = cases2(r[i]);
+					if (d.length == 0)
+						continue;
+					//for (j = 0; j < d.length; ++j)
+					//	if (r.indexOf(d[j]) != -1)
+					//		continue d2;
+					r.splice(i--, 1);
+				}
+				for (i = 0; i < r.length; ++i)
+					if (cases345(r[i], 0).length != 0 || cases345(r[i], 1).length != 0 || cases345(r[i], 2).length != 0)
+						r.splice(i--, 1);
+				test = r;
+				var e = $("#results");
+				e.html("Passed: "+r.length+"<br>");
+				for (i = 0; i < r.length-1; ++i)
+					e.append("<span>"+r[i]+"</span>, ");
+				e.append("<span>"+r[r.length-1]+"</span>");
+				e.find("span").click(function() {
+					$("#case").val(parseInt($(this).html())).trigger("input");
+				});
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<h1>Perfect Cuboid</h1>
+	<section>
+		<div id="calc">
+			Case <input id="case" type="number" value="0">
+			<table>
+				<thead>
+					<tr><th></th><th>(a, b, d)</th><th>(a, c, e)</th><th>(b, c, f)</th><th>(a, f, g)</th><th>(b, e, g)</th><th>(c, d, g)</th></tr>
+				</thead>
+				<tbody>
+				<tr><td>xN</td><td><input name="0" type="radio" value="0" checked></td><td><input name="1" type="radio" value="0" checked></td><td><input name="2" type="radio" value="0" checked></td><td><input name="3" type="radio" value="0" checked></td><td><input name="4" type="radio" value="0" checked></td><td><input name="5" type="radio" value="0" checked></td></tr>
+					<tr><td>x2</td><td><input name="0" type="radio" value="1"></td><td><input name="1" type="radio" value="1"></td><td><input name="2" type="radio" value="1"></td><td><input name="3" type="radio" value="1"></td><td><input name="4" type="radio" value="1"></td><td><input name="5" type="radio" value="1"></td></tr>
+					<tr><td>x3</td><td><input name="0" type="radio" value="2"></td><td><input name="1" type="radio" value="2"></td><td><input name="2" type="radio" value="2"></td><td><input name="3" type="radio" value="2"></td><td><input name="4" type="radio" value="2"></td><td><input name="5" type="radio" value="2"></td></tr>
+					<tr><td>x4</td><td><input name="0" type="radio" value="3"></td><td><input name="1" type="radio" value="3"></td><td><input name="2" type="radio" value="3"></td><td><input name="3" type="radio" value="3"></td><td><input name="4" type="radio" value="3"></td><td><input name="5" type="radio" value="3"></td></tr>
+					<tr><td>x5</td><td><input name="0" type="radio" value="4"></td><td><input name="1" type="radio" value="4"></td><td><input name="2" type="radio" value="4"></td><td><input name="3" type="radio" value="4"></td><td><input name="4" type="radio" value="4"></td><td><input name="5" type="radio" value="4"></td></tr>
+					<tr><td>x2 x3</td><td><input name="0" type="radio" value="5"></td><td><input name="1" type="radio" value="5"></td><td><input name="2" type="radio" value="5"></td><td><input name="3" type="radio" value="5"></td><td><input name="4" type="radio" value="5"></td><td><input name="5" type="radio" value="5"></td></tr>
+					<tr><td>x2 x5</td><td><input name="0" type="radio" value="6"></td><td><input name="1" type="radio" value="6"></td><td><input name="2" type="radio" value="6"></td><td><input name="3" type="radio" value="6"></td><td><input name="4" type="radio" value="6"></td><td><input name="5" type="radio" value="6"></td></tr>
+					<tr><td>x3 x4</td><td><input name="0" type="radio" value="7"></td><td><input name="1" type="radio" value="7"></td><td><input name="2" type="radio" value="7"></td><td><input name="3" type="radio" value="7"></td><td><input name="4" type="radio" value="7"></td><td><input name="5" type="radio" value="7"></td></tr>
+					<tr><td>x3 x5</td><td><input name="0" type="radio" value="8"></td><td><input name="1" type="radio" value="8"></td><td><input name="2" type="radio" value="8"></td><td><input name="3" type="radio" value="8"></td><td><input name="4" type="radio" value="8"></td><td><input name="5" type="radio" value="8"></td></tr>
+					<tr><td>x4 x5</td><td><input name="0" type="radio" value="9"></td><td><input name="1" type="radio" value="9"></td><td><input name="2" type="radio" value="9"></td><td><input name="3" type="radio" value="9"></td><td><input name="4" type="radio" value="9"></td><td><input name="5" type="radio" value="9"></td></tr>
+					<tr><td>x2 x3 x5</td><td><input name="0" type="radio" value="10"></td><td><input name="1" type="radio" value="10"></td><td><input name="2" type="radio" value="10"></td><td><input name="3" type="radio" value="10"></td><td><input name="4" type="radio" value="10"></td><td><input name="5" type="radio" value="10"></td></tr>
+					<tr><td>x3 x4 x5</td><td><input name="0" type="radio" value="11"></td><td><input name="1" type="radio" value="11"></td><td><input name="2" type="radio" value="11"></td><td><input name="3" type="radio" value="11"></td><td><input name="4" type="radio" value="11"></td><td><input name="5" type="radio" value="11"></td></tr>
+				</tbody>
+			</table>
+			<br>
+			Equivalent: <span id="equiv"></span>
+			<br>
+			Div. 2: <span id="d2"></span>
+			<br><br>
+		</div>
+		<div id="steps"></div>
+		<div id="vars"></div>
+	</section>
+	<hr>
+	<section>
+		<input id="all" type="button" value="Check All"> WARNING: This will check all 2985984 cases and can take a while.
+		<div id="results"></div>
+	</section>
+</body>
+</html>

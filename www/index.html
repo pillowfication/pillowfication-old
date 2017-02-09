@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>Pillowfication</title>
+	<style>
+		html, body      {width: 100%; height: 100%; margin: 0px; padding: 0px; background-color: #000000; overflow: hidden; font-size: 38px}
+		img             {width: 724px; height: 219px}
+		#fader          {position: fixed; width: 100%; height: 100%; background-color: #AAAAAA; transition: opacity 2s}
+		#fader.open     {opacity: 0}
+		#center         {position: fixed; top: 50%; left: 50%; margin-top: -110px}
+		#pf             {position: relative; left: -362px; cursor: pointer; transform: rotate(-180deg); transition: transform .9s}
+		#pf.hover, #pf.click {transform: rotate(0deg)}
+		#left           {position: fixed; top: 0px; left: 0%; height: 100%; width: 50%; background-color: #EFEFEF; overflow: hidden; transition: left 1.7s}
+		#right          {position: fixed; top: 0px; right: 0%; height: 100%; width: 50%; background-color: #EFEFEF; overflow: hidden; transition: right 1.7s}
+		#left img       {visibility: hidden; position: absolute; top: 50%; right: -362px; margin-top: -110px}
+		#right img      {visibility: hidden; position: absolute; top: 50%; left: -362px; margin-top: -110px}
+		#left.open      {left: -50%}
+		#right.open     {right: -50%}
+		#left.open img  {visibility: visible}
+		#right.open img {visibility: visible}
+
+		#menu                         {z-index: 5; position: fixed; box-sizing: border-box; left: 0px; bottom: 90px; height: 0px; width: 100%; padding-left: 90px; color: white; overflow: hidden; transition: height 1.5s}
+		#menu ul                      {list-style-type: none; margin: 0px; padding: 0px; overflow: hidden}
+		#menu > ul > li               {position: relative; width: 200px; height: 50px; line-height: 50px}
+		#menu > ul > li::before       {content: ""; display: inline-block; position: relative; top: -9px; left: -23px; width: 30px; height: 1px; background-color: #FFFFFF; opacity: 0; transition: all .3s}
+		#menu > ul > li:hover::before {left: -13px; opacity: 1}
+		#menu > ul > li > ul          {position: absolute; top: 0px; left: 150px; white-space: nowrap; visibility: hidden; opacity: 0; transition: visibility 0s .2s, left .2s, opacity .2s}
+		#menu li:hover ul             {left: 180px; visibility: visible; opacity: 1; transition-delay: 0s}
+		#menu > ul > li > ul > li     {display: inline-block; padding: 0px 10px}
+		a               {position: relative; color: #FFFFFF; text-decoration: none}
+		a::before       {content: ""; display: block; position: absolute; top: 10%; left: 30px; width: 1px; height: 90%; background-color: #FFFFFF; opacity: 0; transition: all .3s}
+		a::after        {content: ""; display: block; position: absolute; top: 10%; right: 30px; width: 1px; height: 90%; background-color: #FFFFFF; opacity: 0; transition: all .3s}
+		a:hover::before {left: -10px; opacity: 1;}
+		a:hover::after  {right: -10px; opacity: 1;}
+
+		#cvs {opacity: 0; transition: opacity 3s}
+
+		@media only screen and (max-width: 800px) {
+			img     {width: 302px; height: 91px}
+			#center {margin-top: -46px}
+			#pf     {left: -151px}
+			#left img  {right: -151px; margin-top: -46px}
+			#right img {left: -151px; margin-top: -46px}
+		}
+	</style>
+	<script src="assets/js/jquery.js"></script>
+	<script src="assets/js/pillow/pfcanvas.js"></script>
+	<script>
+		$(function() {
+			var clicked = false;
+			$("#pf").hover(
+				function() {
+					$(this).addClass("hover");
+				},
+				function() {
+					$(this).removeClass("hover");
+					clicked = false;
+				}
+			).on("click touchstart", function() {
+				$(this).addClass("click");
+				if (clicked)
+					open();
+			}).bind("transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd", function(e) {
+				clicked = $(this).hasClass("hover");
+				if ($(this).hasClass("click"))
+					open();
+			});
+			function open() {
+				$("#left, #right, #fader").addClass("open");
+				$("#center").remove();
+				window.setTimeout(function() {
+					$("#left, #right, #fader").remove();
+					$("#menu").height(50*3);
+					icosahedron();
+				}, 1800);
+			};
+
+			var gr = (1+Math.sqrt(5))/2
+			var points = [[0, 1, gr], [0, 1, -gr], [0, -1, gr], [0, -1, -gr], [1, gr, 0], [1, -gr, 0], [-1, gr, 0], [-1, -gr, 0], [gr, 0, 1], [-gr, 0, 1], [gr, 0, -1], [-gr, 0, -1]];
+			var edges = [[0, 2], [0, 4], [0, 6], [0, 8], [0, 9], [1, 3], [1, 4], [1, 6], [1, 10], [1, 11], [2, 5], [2, 7], [2, 8], [2, 9], [3, 5], [3, 7], [3, 10], [3, 11], [4, 6], [4, 8], [4, 10], [5, 7], [5, 8], [5, 10], [6, 9], [6, 11], [7, 9], [7, 11], [8, 10], [9, 11]];
+			
+			var plane = 3;
+			var dist = 2;
+			var azimuth = 0;
+			var elevation = 0;
+			var scale = 150;
+
+			function icosahedron() {
+				$("body").pillowcanvas(function(ctx) {
+					var w = ctx.canvas.width, h = ctx.canvas.height;
+					ctx.clearRect(0, 0, w, h);
+
+					var proj = [];
+					var cT = Math.cos(azimuth), sT = Math.sin(azimuth);
+					var cP = Math.cos(elevation), sP = Math.sin(elevation);
+					points.forEach(function(p) {
+						var a = p[0], b = p[1], c = p[2];
+						var z = cT*cP*c-sT*cP*a-sP*b;
+						var x = (cT*a+sT*c)*dist/(z+dist+plane);
+						var y = (-sT*sP*a+cP*b+cT*sP*c)*dist/(z+dist+plane);
+						proj.push([x, y]);
+					});
+
+					ctx.strokeStyle = "#FFFFFF";
+					edges.forEach(function(e) {
+						ctx.beginPath();
+						ctx.moveTo(w-240+scale*proj[e[0]][0], 240-scale*proj[e[0]][1]);
+						ctx.lineTo(w-240+scale*proj[e[1]][0], 240-scale*proj[e[1]][1]);
+						ctx.stroke();
+						ctx.closePath();
+					});
+
+					azimuth += .035;
+					elevation += .007;
+				}, "cvs");
+				$("#cvs").css("opacity", "1");
+			}
+		});
+	</script>
+</head>
+
+<body>
+	<div id="fader"></div>
+	<div id="left"><div><img src="assets/img/pillowfication.png"></div></div>
+	<div id="right"><div><img src="assets/img/pillowfication.png"></div></div>
+	<div id="center"><img id="pf" src="assets/img/pillowfication.png"></div>
+	<div id="menu">
+		<ul>
+			<li><a href="games">games</a>
+				<ul>
+					<li><a href="games/wizard">wizard</a></li>
+					<li><a href="games/tetris">tetris</a></li>
+				</ul>
+			</li>
+			<li><a href="projects">projects</a>
+				<ul>
+					<li><a href="projects/tree">tree</a></li>
+					<li><a href="projects/delaunay">delaunay</a></li>
+					<li><a href="projects/bezier">bezier</a></li>
+					<li><a href="projects/3D">3D</a></li>
+				</ul>
+			</li>
+			<li><a href="misc">misc</a>
+				<ul>
+					<li><a href="misc/rotmg">rotmg</a></li>
+					<li><a href="misc/mafia">mafia</a></li>
+					<li><a href="http://pillowfication.science/">science</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</body>
+</html>

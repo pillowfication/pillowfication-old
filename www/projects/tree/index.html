@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Tree</title>
+	<style>
+		html, body {width: 100%; height: 100%; margin: 0px; border: 0px; padding: 0px; overflow: hidden; color: #FFFFFF}
+		hr         {margin: 15px 0px}
+		a          {color: #FFFFFF}
+		h3         {display: block; position: relative; margin: 4px 0px; padding: 8px 0px; cursor: pointer}
+		#canvas    {position: fixed; top: 0px; left: 0px; box-sizing: border-box; width: 100%; height: 100%; border-right: 400px solid #000000; background-color: #000000; cursor: ew-resize}
+		#options   {position: fixed; top: 0px; right: 0px; box-sizing: border-box; width: 400px; height: 100%; border-left: 2px solid #FFFFFF; padding: 10px 30px 30px; overflow: auto}
+		#tab       {position: fixed; top: 0px; right: 398px; box-sizing: border-box; width: 30px; height: 50px; border: 2px solid #FFFFFF; padding-top: 12px; text-align: center; font-weight: 900; line-height: 10px; cursor: pointer}
+		#right     {display: block}
+		#left      {display: none}
+		.hide #canvas  {border-right: 0px}
+		.hide #options {right: -400px}
+		.hide #tab     {right: -2px}
+		.hide #right   {display: none}
+		.hide #left    {display: block}
+		.label     {display: inline-block; width: 120px}
+		.input     {font-family: "Courier New", Courier, monospace}
+		input.rgbcomp        {width: 42px}
+		input[type="number"],
+		input[type="text"]   {border: 1px solid #FFFFFF; padding: 3px; background-color: #000000; color: #FFFFFF}
+		input[type="button"] {width: 100%; height: 70px; border: 3px solid #FFFFFF; background-color: #000000; color: #FFFFFF; cursor: pointer}
+		.tip       {font-size: .8rem}
+		section > div          {display: none}
+		section.show > div     {display: block}
+		h3::after              {content: ">"; position: absolute; right: 20px; transition: transform .2s; -webkit-transition: -webkit-transform .2s}
+		section.show h3::after {transform: rotate(90deg); -webkit-transform: rotate(90deg)}
+	</style>
+	<script src="../../assets/js/jquery.js"></script>
+	<script src="../../assets/js/pillow/pfcanvas.js"></script>
+	<script src="../../assets/js/seedrandom.min.js"></script>
+	<script>
+		$(function() {
+			var PI2 = Math.PI*2, VSPEED = .01;
+			var seed,
+			    bcr, bcg, bcb, scr, scg, scb, sca, fcr, fcg, fcb, fca, lcr, lcg, lcb, lca, dcr, dcg, dcb, dca,
+			    b_node, b_mu, b_sigma, b_init, b_stroke, b_thin, b_curve, b_prob, b_branch,
+			    l_dist, l_dev, l_size, l_sdev, l_start, l_prob,
+			    scale, off_x, off_y, fill, segments, circles, type, leaf;
+			var bgc, strokec, fillc, cosw_c, cosw_t;
+
+			var view, id, branches, tree, leaves;
+			var angle = 0, left = false, right = false, drag = false, prevMx = 0, currMx = 0;
+
+			function init() {
+				seed = $("#seed").val();
+				bcr = pf("bcr"), bcg = pf("bcg"), bcb = pf("bcb");
+				scr = pf("scr"), scg = pf("scg"), scb = pf("scb"), sca = pf("sca");
+				fcr = pf("fcr"), fcg = pf("fcg"), fcb = pf("fcb"), fca = pf("fca");
+				lcr = pf("lcr"), lcg = pf("lcg"), lcb = pf("lcb"), lca = pf("lca");
+				dcr = pf("dcr"), dcg = pf("dcg"), dcb = pf("dcb"), dca = pf("dca");
+				b_node  = pf("b_node"),  b_mu     = pf("b_mu"),     b_sigma  = pf("b_sigma");
+				b_init  = pf("b_init"),  b_stroke = pf("b_stroke"), b_thin   = pf("b_thin");
+				b_curve = pf("b_curve"), b_prob   = pf("b_prob"),   b_branch = pf("b_branch");
+				l_dist = pf("l_dist"), l_dev = pf("l_dev"), l_size = pf("l_size"), l_sdev = pf("l_sdev"), l_start = pf("l_start"), l_prob = pf("l_prob");
+				lcr -= dcr, lcg -= dcg, lcb -= dcb, lca -= dca;
+				dcr *- 2, dcg *= 2, dcb *= 2, dca *= 2;
+				b_init /= 2, b_stroke = b_init-b_stroke, b_thin = Math.pow(b_thin, b_node);
+				b_curve *= Math.sqrt(b_node), b_prob *= b_node;
+				l_dist -= l_dev, l_dev *= 2, l_size = (l_size-l_sdev)/2, l_sdev /= 2, l_start /= b_node, l_prob *= b_node;
+				bgc     = "rgb("+bcr+","+bcg+","+bcb+")";
+				strokec = "rgba("+scr+","+scg+","+scb+","+sca+")";
+				fillc   = "rgba("+fcr+","+fcg+","+fcb+","+fca+")";
+				cosw_c = 1-Math.cos(b_curve), cosw_b = 1-Math.cos(b_branch);
+
+				seed == "" ? Math.seedrandom() : Math.seedrandom(seed);
+				view = 0;
+				branches = [[0, 0, 0, [0, 0, 1], 0, 0, randNorm()]];
+				tree = [[[0, 0, 0, 0]]];
+				leaves = [];
+				id = 1;
+			}
+			function pf(e) {
+				return parseFloat($("#"+e).val());
+			}
+
+			function updateBranch(b) {
+				if (Math.random() < b_prob) {
+					var d = randVect(b[3], cosw_b);
+					branches.push([b[0], b[1], b[2], d, id++, b[5], randNorm()]);
+					tree.push([[b[0], b[1], b[2], b[5]]]);
+				}
+				if (b[5] > l_start && Math.random() < l_prob) {
+					var t = PI2*Math.random(), p = Math.acos(Math.random()), r = l_dist+l_dev*Math.random();
+					var ct = Math.cos(t), st = Math.sin(t), cp = Math.cos(p), sp = Math.sin(p);
+					var cr = lcr+dcr*Math.random(), cg = lcg+dcg*Math.random(), cb = lcb+dcb*Math.random(), ca = lca+dca*Math.random();
+					leaves.push([b[0]+r*ct*sp, b[1]+r*st*sp, b[2]+r*cp, cr|0, cg|0, cb|0, ca, l_size+l_sdev*Math.random()]);
+				}
+
+				b[3] = randVect(b[3], cosw_c);
+				b[0] += b_node*b[3][0];
+				b[1] += b_node*b[3][1];
+				b[2] += b_node*b[3][2];
+				++b[5];
+				tree[b[4]].push([b[0], b[1], b[2]]);
+			}
+
+			function randNorm() {
+				return (b_mu+b_sigma*Math.sqrt(-2*Math.log(Math.random()))*Math.cos(PI2*Math.random()))/b_node|0;
+			}
+			function randVect(u, c) {
+				var t = Math.atan2(u[1], u[0]), p = Math.atan2(u[2], Math.sqrt(u[0]*u[0]+u[1]*u[1]));
+				var a = p+Math.acos(1-c*Math.random()), ca = Math.cos(a), vz = Math.sin(a);
+				var vx = Math.cos(t)*ca, vy = Math.sin(t)*ca;
+				var r = PI2*Math.random(), cr = Math.cos(r), sr = Math.sin(r), vr = 1-cr;
+				var xy = u[0]*u[1], xz = u[0]*u[2], yz = u[1]*u[2];
+
+				return [(cr+u[0]*u[0]*vr)*vx+(xy*vr-u[2]*sr)*vy+(xz*vr+u[1]*sr)*vz,
+				        (xy*vr+u[2]*sr)*vx+(cr+u[1]*u[1]*vr)*vy+(yz*vr-u[0]*sr)*vz,
+				        (xz*vr-u[1]*sr)*vx+(yz*vr+u[0]*sr)*vy+(cr+u[2]*u[2]*vr)*vz];
+			}
+
+			init();
+
+			$("#canvas").pillowcanvas(function(ctx) {
+				scale = pf("scale"), off_x = pf("off_x"), off_y = pf("off_y");
+				fill = $("#fill").prop("checked"), segments = $("#segments").prop("checked"), circles = $("#circles").prop("checked");
+				type = $("#type").prop("checked"), leaf = $("#leaf").prop("checked");
+
+				if (left != right)
+					if (left)
+						view -= 10;
+					else
+						view += 10;
+				if (drag) {
+					view += currMx-prevMx;
+					prevMx = currMx;
+				}
+
+				var width = ctx.canvas.width, height = ctx.canvas.height, cx = width/2+off_x*scale, cy = height-off_y*scale;
+				ctx.fillStyle = bgc;
+				ctx.fillRect(0, 0, width, height);
+
+				var t = view*VSPEED, ct = Math.cos(t)*scale, st = Math.sin(t)*scale;
+				var i, j, k, b, p, v, w, xy, vx, vy, wx, wy;
+
+				ctx.fillStyle = strokec;
+				ctx.strokeStyle = strokec;
+				for (i = 0; i < id; ++i) {
+					k = tree[i][0];
+					b = [cx+k[0]*st+k[1]*ct, cy-k[2]*scale];
+					v = b_init*Math.pow(b_thin, k[3]-1)*scale;
+					for (j = 0; j < tree[i].length; ++j) {
+						k = tree[i][j];
+						p = [cx+k[0]*st+k[1]*ct, cy-k[2]*scale];
+						w = v*b_thin;
+						if (circles) {
+							ctx.beginPath();
+							ctx.arc(p[0], p[1], w, 0, PI2);
+							ctx.fill();
+							ctx.closePath();
+						}
+						if (segments) {
+							if (type) {
+								vx = p[0]-b[0], vy = p[1]-b[1];
+								xy = Math.sqrt(vx*vx+vy*vy), vx /= xy, vy /= xy;
+								wx = w*vx, wy = w*vy, vx *= v, vy *= v;
+								ctx.beginPath()
+								ctx.moveTo(b[0]+vy, b[1]-vx);
+								ctx.lineTo(b[0]-vy, b[1]+vx);
+								ctx.lineTo(p[0]-wy, p[1]+wx);
+								ctx.lineTo(p[0]+wy, p[1]-wx);
+								ctx.fill();
+								ctx.closePath();
+							}
+							else {
+								ctx.beginPath();
+								ctx.moveTo(b[0], b[1]);
+								ctx.lineTo(p[0], p[1]);
+								ctx.lineWidth = w*2;
+								ctx.stroke();
+								ctx.closePath();
+							}
+						}
+						b = p;
+						v = w;
+					}
+				}
+				if (fill) {
+					ctx.fillStyle = fillc;
+					ctx.strokeStyle = fillc;
+					for (i = 0; i < id; ++i) {
+						k = tree[i][0];
+						b = [cx+k[0]*st+k[1]*ct, cy-k[2]*scale];
+						v = b_stroke*Math.pow(b_thin, k[3]-1)*scale;
+						for (j = 0; j < tree[i].length; ++j) {
+							k = tree[i][j];
+							p = [cx+k[0]*st+k[1]*ct, cy-k[2]*scale];
+							w = v*b_thin;
+							if (circles) {
+								ctx.beginPath();
+								ctx.arc(p[0], p[1], w, 0, PI2);
+								ctx.fill();
+								ctx.closePath();
+							}
+							if (segments) {
+								if (type) {
+									vx = p[0]-b[0], vy = p[1]-b[1];
+									xy = Math.sqrt(vx*vx+vy*vy), vx /= xy, vy /= xy;
+									wx = w*vx, wy = w*vy, vx *= v, vy *= v;
+									ctx.beginPath()
+									ctx.moveTo(b[0]+vy, b[1]-vx);
+									ctx.lineTo(b[0]-vy, b[1]+vx);
+									ctx.lineTo(p[0]-wy, p[1]+wx);
+									ctx.lineTo(p[0]+wy, p[1]-wx);
+									ctx.fill();
+									ctx.closePath();
+								}
+								else {
+									ctx.beginPath();
+									ctx.moveTo(b[0], b[1]);
+									ctx.lineTo(p[0], p[1]);
+									ctx.lineWidth = w*2;
+									ctx.stroke();
+									ctx.closePath();
+								}
+							}
+							b = p;
+							v = w;
+						}
+					}
+				}
+				if (leaf)
+					for (i = 0; i < leaves.length; ++i) {
+						k = leaves[i];
+						ctx.fillStyle = "rgba("+k[3]+","+k[4]+","+k[5]+","+k[6]+")";
+						ctx.beginPath();
+						ctx.arc(cx+k[0]*st+k[1]*ct, cy-k[2]*scale, k[7]*scale, 0, PI2);
+						ctx.fill();
+						ctx.closePath();
+					}
+
+				for (i = 0; i < branches.length; ++i) {
+					k = branches[i];
+					updateBranch(k);
+					if (k[5] > k[6])
+						branches.splice(i--);
+				}
+			}, 60);
+
+			$("#redraw").click(init);
+
+			$(document).bind({
+				keydown: function(e) {
+					switch(e.keyCode) {
+						case 37: left = true; break;
+						case 39: right = true; break;
+					}
+				},
+				keyup: function(e) {
+					switch(e.keyCode) {
+						case 13: init(); break;
+						case 37: left = false; break;
+						case 39: right = false; break;
+					}
+				}
+			});
+			$("#canvas").bind({
+				mousedown: function(e) {
+					drag = true;
+					prevMx = e.pageX;
+				},
+				mouseup: function(e) {
+					drag = false;
+				},
+				mousemove: function(e) {
+					currMx = e.pageX;
+				}
+			})
+
+			$("#tab").click(function() {
+				$("body").toggleClass("hide");
+				$(window).resize();
+			});
+			$("h3").click(function() {
+				$(this).parent().toggleClass("show");
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<div id="canvas"></div>
+	<div id="options">
+		<p>
+			Use the LEFT and RIGHT arrow keys or MOUSEDRAG to rotate tree.<br>
+			ENTER to redraw.
+		</p>
+		<p>
+			Weird things happen occasionally.
+		</p>
+		<p>
+			The following options are measured in pixels and radians, and automatically scale with <span class="input">b_node</span>. Base values are assuming <span class="input">b_node = 1</span> which places nodes 1 pixel apart.
+		</p>
+		<p>
+			See the old version <a href="old.html">here</a>.
+		</p>
+		<hr>
+		<section>
+			<h3>SEED</h3>
+			<div>
+				<p>
+					<span class="input">
+						<span class="label">seed = </span>
+						<input id="seed" type="text">
+					</span>
+					<br>
+					<span class="tip">The seed to use for random number generation.</span>
+				</p>
+			</div>
+		</section>
+		<hr>
+		<section>
+			<h3>COLOR OPTIONS</h3>
+			<div>
+				<p>
+					Background Color:<br>
+					<span class="input">
+						rgb (<input id="bcr" type="number" class="rgbcomp" value="0">,
+						     <input id="bcg" type="number" class="rgbcomp" value="0">,
+						     <input id="bcb" type="number" class="rgbcomp" value="0">)
+					</span>
+				</p>
+				<p>
+					Stroke Color:<br>
+					<span class="input">
+						rgba(<input id="scr" type="number" class="rgbcomp" value="255">,
+						     <input id="scg" type="number" class="rgbcomp" value="255">,
+						     <input id="scb" type="number" class="rgbcomp" value="255">,
+						     <input id="sca" type="number" class="rgbcomp" value="1">)
+					</span>
+				</p>
+				<p>
+					Fill Color:<br>
+					<span class="input">
+						rgba(<input id="fcr" type="number" class="rgbcomp" value="0">,
+						     <input id="fcg" type="number" class="rgbcomp" value="0">,
+						     <input id="fcb" type="number" class="rgbcomp" value="0">,
+						     <input id="fca" type="number" class="rgbcomp" value="1">)
+					</span>
+				</p>
+				<p>
+					Leaf Color:<br>
+					<span class="input">
+						rgba(<input id="lcr" type="number" class="rgbcomp" value="255">,
+						     <input id="lcg" type="number" class="rgbcomp" value="160">,
+						     <input id="lcb" type="number" class="rgbcomp" value="220">,
+						     <input id="lca" type="number" class="rgbcomp" value=".4">)
+					</span>
+				</p>
+				<p>
+					Leaf Color Deviation:<br>
+					<span class="input">
+						rgba(<input id="dcr" type="number" class="rgbcomp" value="30">,
+						     <input id="dcg" type="number" class="rgbcomp" value="30">,
+						     <input id="dcb" type="number" class="rgbcomp" value="30">,
+						     <input id="dca" type="number" class="rgbcomp" value=".3">)
+					</span>
+					<br>
+					<span class="tip">The components of Leaf Color are uniformly distributed between the Color value plus/minus the Deviation value</span>
+				</p>
+			</div>
+		</section>
+		<hr>
+		<section>
+			<h3>BRANCH OPTIONS</h3>
+			<div>
+				<p>
+					Node Distance:<br>
+					<span class="input">
+						<span class="label">b_node = </span>
+						<input id="b_node" type="number" value="10">
+					</span>
+					<br>
+					<span class="tip">How far apart the nodes on a branch are placed</span>
+				</p>
+				<p>
+					Branch Length Mean:<br>
+					<span class="input">
+						<span class="label">b_mu = </span>
+						<input id="b_mu" type="number" value="740">
+					</span>
+					<br>
+					<span class="tip">The mean length of the branches</span>
+				</p>
+				<p>
+					Branch Length Deviation:<br>
+					<span class="input">
+						<span class="label">b_sigma = </span>
+						<input id="b_sigma" type="number" value="80">
+					</span>
+					<br>
+					<span class="tip">The length of the branches is normally distributed using this standard deviation</span>
+				</p>
+				<p>
+					Branch Initial Width:<br>
+					<span class="input">
+						<span class="label">b_init = </span>
+						<input id="b_init" type="number" value="120">
+					</span>
+					<br>
+					<span class="tip">The initial width of the branch (width of trunk) measured with the stroke</span>
+				</p>
+				<p>
+					Branch Initial Stroke Width:<br>
+					<span class="input">
+						<span class="label">b_stroke = </span>
+						<input id="b_stroke" type="number" value="10">
+					</span>
+					<br>
+					<span class="tip">The initial stroke width of the branch</span>
+				</p>
+				<p>
+					Branch Thinning:<br>
+					<span class="input">
+						<span class="label">b_thin = </span>
+						<input id="b_thin" type="number" value=".995">
+					</span>
+					<br>
+					<span class="tip">At each node, the branch width is thinned by this percentage</span>
+				</p>
+				<p>
+					Branch Curvature:<br>
+					<span class="input">
+						<span class="label">b_curve = </span>
+						<input id="b_curve" type="number" value=".045">
+					</span>
+					<br>
+					<span class="tip">At each node, the direction of the branch may change by an angle from 0 to this value (cosine weighted). This value does not scale well with <span class="input">b_node</span></span>
+				</p>
+				<p>
+					Branching Probability:<br>
+					<span class="input">
+						<span class="label">b_prob = </span>
+						<input id="b_prob" type="number" value=".0064">
+					</span>
+					<br>
+					<span class="tip">At each node, there is a probability equal to this for a new branch to spawn</span>
+				</p>
+				<p>
+					Branching Angle:<br>
+					<span class="input">
+						<span class="label">b_branch = </span>
+						<input id="b_branch" type="number" value=".85">
+					</span>
+					<br>
+					<span class="tip">When a new branch is formed, the direction of the new branch may change by an angle from 0 to this value (cosine weighted)</span>
+				</p>
+			</div>
+		</section>
+		<hr>
+		<section>
+			<h3>LEAF OPTIONS</h3>
+			<div>
+				<p>
+					Leafing Distance:<br>
+					<span class="input">
+						<span class="label">l_dist = </span>
+						<input id="l_dist" type="number" value="60">
+					</span>
+					<br>
+					<span class="tip">The mean distance from the node that a leaf will be placed</span>
+				</p>
+				<p>
+					Leafing Deviation:<br>
+					<span class="input">
+						<span class="label">l_dev = </span>
+						<input id="l_dev" type="number" value="40">
+					</span>
+					<br>
+					<span class="tip">The leaf distance is uniformly distributed between the mean plus/minus this value</span>
+				</p>
+				<p>
+					Leaf Size:<br>
+					<span class="input">
+						<span class="label">l_size = </span>
+						<input id="l_size" type="number" value="20">
+					</span>
+					<br>
+					<span class="tip">The mean diameter of the leaves</span>
+				</p>
+				<p>
+					Leaf Size Deviation:<br>
+					<span class="input">
+						<span class="label">l_sdev = </span>
+						<input id="l_sdev" type="number" value="10">
+					</span>
+					<br>
+					<span class="tip">The leaf size is uniformly distributed between the mean plus/minus this value</span>
+				</p>
+				<p>
+					Leafing Start:<br>
+					<span class="input">
+						<span class="label">l_start = </span>
+						<input id="l_start" type="number" value="300">
+					</span>
+					<br>
+					<span class="tip">Will wait for these many nodes before leaves will be placed</span>
+				</p>
+				<p>
+					Leafing Probability:<br>
+					<span class="input">
+						<span class="label">l_prob = </span>
+						<input id="l_prob" type="number" value=".08">
+					</span>
+					<br>
+					<span class="tip">At each node, there is a probability equal to this for a leaf to be placed</span>
+				</p>
+			</div>
+		</section>
+		<hr>
+		<section>
+			<h3>RENDER OPTIONS</h3>
+			<div>
+				<p>
+					Scale:<br>
+					<span class="input">
+						<span class="label">scale = </span>
+						<input id="scale" type="number" value="1">
+					</span>
+				</p>
+				<p>
+					Offset X:<br>
+					<span class="input">
+						<span class="label">off_x = </span>
+						<input id="off_x" type="number" value="0">
+					</span>
+				</p>
+				<p>
+					Offset Y:<br>
+					<span class="input">
+						<span class="label">off_y = </span>
+						<input id="off_y" type="number" value="0">
+					</span>
+				</p>
+				<p>
+					Branches:<br>
+					<span class="input">
+						<label>
+							<span class="label">fill = </span>
+							<input id="fill" type="checkbox" checked>
+						</label>
+					</span>
+					<br>
+					<span class="input">
+						<label>
+							<span class="label">segments = </span>
+							<input id="segments" type="checkbox" checked>
+						</label>
+					</span>
+					<br>
+					<span class="input">
+						<label>
+							<span class="label">circles = </span>
+							<input id="circles" type="checkbox" checked>
+						</label>
+					</span>
+				</p>
+				<p>
+					Segment Type:<br>
+					<span class="input">
+						<span class="label">type = </span>
+						<label>
+							<input id="type" name="type" type="radio" checked>
+							<span class="label">trap</span>
+						</label>
+						<br>
+						<span class="label"></span>
+						<label>
+							<input name="type" type="radio">
+							<span class="label">rect</span>
+						</label>
+					</span>
+				</p>
+				<p>
+					Leaves:<br>
+					<span class="input">
+						<label>
+							<span class="label">leaf = </span>
+							<input id="leaf" type="checkbox" checked>
+						</label>
+					</span>
+				</p>
+			</div>
+		</section>
+		<hr>
+		<input id="redraw" type="button" value="REDRAW">
+	</div>
+	<div id="tab">
+		<div id="right">\<br>/</div>
+		<div id="left">/<br>\</div>
+	</div>
+</body>

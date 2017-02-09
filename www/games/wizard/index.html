@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>WIZARD</title>
+	<style>
+		html, body, .m {width: 100%; height: 100%; padding: 0px; border: 0px; margin: 0px; overflow: hidden; background-color: #000000; color: #DDDDDD}
+		a:link, a:visited {color:#DDDDDD}
+		a:hover           {color:#FF0000}
+		a:active          {color:#DDDDDD}
+		#game    {margin: auto; width: 700px; height: 500px; border: #FFFFFF 1px solid}
+		#text    {position: relative; width: 674px; height: 109px; left: -1px; top: 364px; border: #FFFFFF 1px solid; padding: 13px; background-color: rgba(0,0,0,.4); font-size: 24px; color: #FFF}
+		#select  {position: relative}
+		#options {position: relative; left: 30px}
+		#music   {position: absolute}
+		#warning {width: 100%; text-align: center; font-size: 10px}
+	</style>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="wizardstory.js"></script>
+	<script>
+		$(function() {
+			$game = $("#game"), $text = $("#text"), $select = $("#select"), $music = $("#music");
+			text.update();
+			select.show();
+		});
+		$(document).keydown(function(e) {
+			if (e.keyCode == 13)
+				if (select.cur == -1)
+					text.next();
+				else
+					select.select();
+			if (e.keyCode == 38)
+				select.up();
+			if (e.keyCode == 40)
+				select.down();
+		});
+		
+		var player = {
+			default : ["Darq", "Deyst", "Drac", "Drol", "Eango", "Eashy", "Eati", "Eendi", "Ehoni", "Gharr", "Iatho", "Iawa", "Idrae", "Iri", "Issz", "Itani", "Laen", "Lauk", "Lorz", "Oalei", "Odaru", "Oeti", "Orothi", "Oshyu", "Queq", "Radph", "Rayr", "Ril", "Rilr", "Risrr", "Saylt", "Scheev", "Sek", "Serl", "Seus", "Tal", "Tiar", "Uoro", "Urake", "Utanu", "Vorck", "Vorv", "Yangu", "Yimi", "Zhiar"],
+			name : "", gold : 0, robe : false, spell : false, staff : false,
+			setname : function() {
+				this.name = window.prompt("Please enter your name", this.default[~~(Math.random()*this.default.length)]);
+			},
+			addgold : function(num) {
+				this.gold += num;
+			}
+		};
+		var music = {
+			change : function(name) {
+				$music.html("<embed src=\"mus/"+name+".mp3\" autostart=\"true\" loop=\"true\" hidden=\"true\">");
+			}
+		};
+		var picture = {
+			change : function(num) {
+				$game.css("background-image", "url(img/"+num+".png)");
+			}
+		};
+		var text = {
+			tex : 0,
+			update : function() {
+				w = story[this.tex];
+				w = w.replace(/%n/g, player.name);
+				w = w.replace(/%g/g, player.gold);
+				switch (w[0]) {
+					case '#':
+						picture.change(w.substring(1));
+						this.next();
+						break;
+					case '$':
+						music.change(w.substring(1));
+						this.next();
+						break;
+					case '&':
+						var i = w.indexOf("&", 1);
+						$text.html("<span id=\"options\">"+w.substring(1, i).replace(/:/g, "<br>")+"</span>");
+						select.update(w.substring(i+1));
+						break;
+					case '@':
+						text.goto(w.substring(1));
+						break;
+					case '~':
+						var num = parseInt(w.substring(1));
+						switch (num) {
+							case 0:
+								player.setname();
+								text.next();
+								break;
+							case 1:
+								player.addgold(2600);
+								text.next();
+								break;
+							case 2:
+								player.addgold(7000);
+								text.next();
+								break;
+							case 3:
+								player.addgold(16000);
+								text.next(); break;
+							case 4:
+								player.addgold(999999);
+								text.next();
+								break;
+							case 5: case 6: case 7:
+								var amt;
+								switch (num) {
+									case 5: amt = 825; break;
+									case 6: amt = 325; break;
+									case 7: amt = 800; break;
+								}
+								if (player.gold >= amt) {
+									player.addgold(-amt);
+									switch (num) {
+										case 5: player.robe = true; break;
+										case 6: player.spell = true; break;
+										case 7: player.staff = true; break;
+									}
+									text.goto(num-2);
+								}
+								else
+									text.goto(15-num);
+								break;
+							case 8:
+								if (player.robe && player.spell && player.staff)
+									text.goto("4");
+								else
+									text.next();
+								break;
+							case 9:
+								window.location = "http://www.pillowfication.com/rotmg/";
+								break;
+						}
+						break;
+					default: $text.html(w);
+				}
+			},
+			next : function() {
+				++this.tex;
+				this.update();
+			},
+			goto : function(tex) {
+				this.tex += parseInt(tex);
+				this.update();
+			}
+		};
+		var select = {
+			cur : -1, opt : [],
+			update : function(info) {
+				this.cur = 0;
+				this.opt = info.split(",");
+				this.show();
+			},
+			show : function() {
+				$select.css(this.cur == -1 ? {top: "318px", left: "670px"} : {top: 239+28*this.cur+"px", left: "20px"});
+			},
+			up : function() {
+				if (this.cur != -1)
+					this.cur -= this.cur == 0 ? 0 : 1;
+				this.show();
+			},
+			down : function() {
+				if (this.cur != -1)
+					this.cur += this.cur == this.opt.length-1 ? 0 : 1;
+				this.show();
+			},
+			select : function() {
+				var temp = this.cur;
+				this.cur = -1;
+				text.goto(this.opt[temp]);
+				this.show();
+			}
+		};
+	</script>
+</head>
+
+<body>
+	<div id="music"></div>
+	<table class="m">  <!-- god damn it why did i use a table -->
+		<tr>
+			<td>
+				<div id="game">
+					<div id="text"></div>
+					<img src="select.png" id="select">
+				</div>
+				<div id="warning">
+					<a href="javascript:$music.remove();">Click to stop the music</a>
+				</div>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

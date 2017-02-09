@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Pillowfication - RotMG</title>
+	<style>
+		html, body {width: 100%; height: 100%; margin: 0px; border: 0px; padding: 0px; background-color: #000000; color: #FFFFFF; font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; text-align: center}
+		#game      {position: fixed; top: 0px; width: 100%; text-align: center}
+		iframe     {border: 0px}
+		
+		#menu               {position: fixed; top: 0px; left: 0px; margin: 5px; width: 16px; height: 16px; border: 1px solid #FFFFFF; border-radius: 8px; transition: all .3s; overflow: hidden; user-select: none}
+		#menu #icon         {display: block; position: absolute; width: 16px; height: 16px; text-align: center; line-height: 16px; transition: opacity .3s}
+		#menu:hover         {width: 90px; height: 100px}
+		#menu:hover #icon   {opacity: 0}
+		#menu ul            {position: absolute; width: 90px; margin: 0px; padding: 0px; list-style-type: none; opacity: 0; transition: opacity .3s}
+		#menu li            {width: 100%; height: 25px; text-align: center; line-height: 25px; cursor: pointer}
+		#menu li#b-position {cursor: ns-resize}
+		#menu li:hover      {background-color: rgba(255,255,255,.18)}
+		#menu li:active     {background-color: transparent}
+		#menu li.on         {background-color: rgba(255,255,255,.3)}
+		#menu:hover ul      {opacity: 1}
+		
+		#tophat {visibility: hidden; position: absolute; top: 267px; left: -103px; width: 100%; height: 28px; background: url("tophat.png") center center no-repeat; pointer-events: none}
+		
+		#notepad-container {visibility: hidden; position: absolute; top: 610px; width: 100%; overflow: visible}
+		#notepad           {position: relative; width: 100%; max-width: 790px; height: 90px; margin: 0px auto; border: 1px solid #FFFFFF; padding: 5px; text-align: left; overflow: auto; resize: vertical}
+	</style>
+	<script>
+		document.addEventListener("DOMContentLoaded", function(e) {
+			document.getElementById("menu").onselectstart = function() {
+				return false;
+			};
+			document.getElementById("b-refresh").onclick = function(e) {
+				document.getElementById("rotmg").src = "http://www.realmofthemadgod.com/";
+			};
+			document.getElementById("b-tophat").onclick = function(e) {
+				(this.className == "on") ? (this.className = "", document.getElementById("tophat").style.visibility = "hidden") : (this.className = "on", document.getElementById("tophat").style.visibility = "visible");
+			};
+			document.getElementById("b-notepad").onclick = function(e) {
+				(this.className == "on") ? (this.className = "", document.getElementById("notepad-container").style.visibility = "hidden") : (this.className = "on", document.getElementById("notepad-container").style.visibility = "visible");
+			};
+			var game = document.getElementById("game");
+			game.style.top = "0px";
+			document.getElementById("b-position").onmousedown = function(e) {
+				var py = e.pageY;
+				document.onmousemove = function(e) {
+					game.style.top = parseInt(game.style.top.replace(/[^-\d\.]/g, ""))-py+(py=e.pageY)+"px";
+				};
+				document.onmouseup = function(e) {
+					document.onmousemove = null;
+				};
+			};
+		});
+	</script>
+</head>
+
+<body>
+	<div id="game">
+		<iframe id="rotmg" src="http://www.realmofthemadgod.com/" width="800" height="600" seamless></iframe>
+		<div id="tophat"></div>
+		<div id="notepad-container"><div id="notepad" contenteditable></div></div>
+	</div>
+	<div id="menu">
+		<span id="icon">+</span>
+		<ul>
+			<li id="b-refresh">Refresh</li>
+			<li id="b-notepad">Notepad</li>
+			<li id="b-tophat">Top Hat</li>
+			<li id="b-position">Position</li>
+		</ul>
+	</div>
+</body>
+</html>

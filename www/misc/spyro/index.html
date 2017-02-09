@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Happy Birthday, Spyro!</title>
+  <style>
+    @font-face {font-family: Impact; src: url('fonts/impact.ttf')}
+    html, body {width: 100%; height: 100%; margin: 0px; border: 0px; padding: 0px; overflow: hidden; background-color: rgb(206,237,255)}
+    audio       {display: none}
+    div         {position: absolute; width: 100%; height: 100%}
+    #background {background-image: url('images/grass.png'), url('images/clouds.png'); background-size: auto 40%, auto 100%; background-position: center bottom, center top; background-repeat: repeat-x, repeat-x}
+    #box        {min-width: 1100px; top: 50%; margin-top: -300px; height: 600px}
+    #spyro      {font-family: Impact, Arial, arial, Helvetica, sans-serif; font-size: 96px}
+    #spyro div  {background-size: auto 100%; background-position: right center; background-repeat: no-repeat}
+    #tower      {background-image: url('images/towerrr.png'); background-position: 10% center !important}
+    #smile      {background-image: url('images/spyro1.png')}
+    #shoot      {visibility: hidden; background-image: url('images/spyro2.png')}
+    #spyro.boom #shoot {visibility: visible}
+    #text       {height: 170px; left: 60px; top: 430px; line-height: 60px; color: rgb(205,182,255); text-shadow: 0px 0px 32px #000000, 0px 0px 32px #000000}
+    #click      {font-size: 28px; text-shadow: 0px 0px 8px #000000, 0px 0px 8px #000000}
+    #fireb      {top: 70px; right: 5000px; width: 200px; height: 200px; background-image: url('images/fireball.png'); background-size: 140px auto; background-position: center center; background-repeat: no-repeat}
+  </style>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      var $spyro = $("#spyro");
+      var $fireb = $("#fireb");
+      $("body").click(function() {
+        if (!$spyro.hasClass("boom")) {
+          $spyro.addClass("boom");
+          $fireb.stop().css("right", "420px").animate({"right": "10000px"}, 8000, "linear");
+          setTimeout(function() {
+            $spyro.removeClass("boom");
+          }, 600);
+        }
+      });
+    });
+  </script>
+<head>
+
+<body>
+  <div id="background"></div>
+  <div id="box">
+    <div id="spyro">
+      <div id="tower"></div>
+      <div id="smile"></div>
+      <div id="shoot"></div>
+      <div id="text">HAPPY BIRTHDAY, SPYRO!<br><span id="click">CLICK HIM</span></div>
+    </div>
+    <div id="fireb"></div>
+    <audio autoplay loop><source src="music/spyro1opening.mp3" type="audio/mpeg"></audio>
+  </div>
+</body>
+</html>

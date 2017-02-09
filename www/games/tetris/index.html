@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Tetris</title>
+	<style>
+		html, body {width: 100%; margin: 0px; border: 0px; padding: 0px; background-color: #000000; color: #FFFFFF}
+		a          {color: #FFFFFF}
+		#canvas    {width: 1000px; height: 500px; margin: 10px auto 0px; border: 1px solid #777777}
+		#options   {width: 1000px; margin: 20px auto; text-align: center}
+		section    {display: inline-block; width: 210px; height: 100px; text-align: left; vertical-align: top}
+		#last      {width: 280px; font-size: 12px; text-align: center}
+		p          {height: 34px; margin: 0px;}
+		span.label {display: inline-block; width: 110px}
+		input.bind {width: 70px; border: 1px solid #FFFFFF; padding: 3px; background-color: #000000; color: #FFFFFF}
+		input.butt {width: 200px; margin: 6px 0px; border: 1px solid #FFFFFF; padding: 5px; background-color: #000000; color: #FFFFFF; cursor: pointer}
+		audio      {width: 100%}
+	</style>
+	<script src="../../assets/js/jquery.js"></script>
+	<script src="../../assets/js/pillow/pfcanvas.js"></script>
+	<script src="../../assets/js/keyboardmap.js"></script>
+	<script>
+		$(function() {
+			var rows = 50, cols = 100;
+			var rotation = [[1632, 1632, 1632, 1632], [240, 17476, 240, 17476], [1728, 2244, 1728, 2244], [3168, 1224, 3168, 1224], [736, 3140, 232, 1094], [2272, 1100, 226, 1604], [1248, 1220, 228, 1124]];
+
+			var pi, pq, px, py, pr, spd, spdf, stk, stkf, lines, blocks, ded, data;
+			var left = 37, right = 39, rcw = 38, rccw = 0, sdrop = 40, hdrop = 32;
+			var $lines = $("#lines"), $speed = $("#speed"), $blocks = $("#blocks");
+			document.getElementById("music").volume = .10;
+
+			var bg = document.createElement("canvas");
+			bg.width = cols*10, bg.height = rows*10;
+			bg = bg.getContext("2d");
+			for (var x = 0, dx = 0; x < cols; ++x, dx += 10)
+				for (var y = 0, dy = 0; y < rows; ++y, dy += 10) {
+					bg.fillStyle = "#000000";
+					bg.fillRect(dx, dy, 10, 10);
+					bg.fillStyle = "#191919";
+					bg.fillRect(dx+1, dy+1, 8, 8);
+					bg.fillStyle = "#232323";
+					bg.fillRect(dx+2, dy+1, 6, 8);
+					bg.fillRect(dx+1, dy+2, 8, 6);
+				}
+			bg = bg.canvas;
+			var blockimg = [];
+			for (var i = 0; i < 7; ++i) {
+				var b = document.createElement("canvas"), c, j;
+				b.width = 10, b.height = 10;
+				b = b.getContext("2d");
+				switch (i) {
+					case 0: c = [200, 200, 0]; break;
+					case 1: c = [0, 200, 200]; break;
+					case 2: c = [0, 200, 0]; break;
+					case 3: c = [200, 0, 0]; break;
+					case 4: c = [230, 140, 0]; break;
+					case 5: c = [0, 0, 200]; break;
+					case 6: c = [200, 0, 200]; break;
+				}
+				for (j = 0; j < 4; ++j) {
+					b.fillStyle = "rgb("+c[0]+","+c[1]+","+c[2]+")";
+					b.fillRect(j, j, 10-2*j, 10-2*j);
+					c[0] += 20;
+					c[1] += 20;
+					c[2] += 20;
+				}
+				blockimg.push(b.canvas);
+			}
+			var shad = document.createElement("canvas");
+			shad.width = 10, shad.height = 10;
+			shad = shad.getContext("2d");
+			shad.fillStyle = "#787878";
+			shad.fillRect(0, 0, 10, 10);
+			shad.fillStyle = "#4B4B4B";
+			shad.fillRect(1, 1, 8, 8);
+			shad.fillStyle = "#3C3C3C";
+			shad.fillRect(2, 1, 6, 8);
+			shad.fillRect(1, 2, 8, 6);
+			shad = shad.canvas;
+
+			function init() {
+				pi = 0;
+				pq = [0, 1, 2, 3, 4, 5, 6];
+				shuffle();
+				px = (cols>>1)-2;
+				py = -2;
+				pr = 0;
+				spd = 40;
+				spdf = 0;
+				stk = 60;
+				stkf = 0;
+				lines = 0;
+				blocks = 0;
+				ded = false;
+				data = [];
+				for (var x = 0; x < cols; ++x)
+					data.push([]);
+
+				$lines.html(0);
+				$speed.html(40);
+				$blocks.html(0);
+			}
+
+			function space() {
+				while (!collide(px, ++py, pr));
+				--py;
+				spdf = spd;
+				stkf = stk;
+			}
+			function fleft() {
+				if (collide(--px, py, pr))
+					++px;
+				else
+					stkf = 0;
+			}
+			function fright() {
+				if (collide(++px, py, pr))
+					--px;
+				else
+					stkf = 0;
+			}
+			function down() {
+				spdf = spd;
+			}
+			function rotate(r) {
+				r += pr;
+				r = r < 0 ? 4+r%4 : r%4;
+				if (!collide(px, py, r) || !collide(px, --py, r) || !collide(px, --py, r) || !collide(++px, py += 2, r) || !collide(++px, py, r) || !collide(px -= 3, py, r) || !collide(--px, py, r))
+					pr = r;
+				else
+					px += 2;
+				stkf = 0;
+			}
+
+			function shuffle() {
+				var l = 7, t, i;
+				while (l) {
+					i = l--*Math.random()|0;
+					t = pq[l];
+					pq[l] = pq[i];
+					pq[i] = t;
+				}
+			}
+			function collide(x, y, r) {
+				var d = rotation[pq[pi]][r], i, bx, by;
+				for (i = 0; i < 16; ++i)
+					if (d>>i&1) {
+						bx = x+i%4, by = y+(i/4|0);
+						if (bx < 0 || bx >= cols || by >= rows || by >= 0 && data[bx][by])
+							return true;
+					}
+				return false;
+			}
+
+			init();
+
+			$("#canvas").pillowcanvas(function(ctx) {
+				ctx.drawImage(bg, 0, 0);
+				var x, y, dx, dy, d, e, i;
+
+				for (x = 0, dx = 0; x < cols; ++x, dx += 10)
+					for (y = 0, dy = 0; y < rows; ++y, dy += 10)
+						if (d = data[x][y])
+							ctx.drawImage(blockimg[d-1], dx, dy);
+				d = pq[pi], e = rotation[d][pr], d = blockimg[d], y = py;
+				while (!collide(px, ++y, pr));
+				--y;
+				for (i = 0; i < 16; ++i)
+					if (e>>i&1) {
+						ctx.drawImage(shad, (px+i%4)*10, (y+(i/4|0))*10);
+						ctx.drawImage(d, (px+i%4)*10, (py+(i/4|0))*10);
+					}
+				ctx.font = "15px Verdana";
+				ctx.fillStyle = "#FFFFFF";
+				ctx.fillText(lines, 5, 17);
+
+				if (!ded) {
+					if (y == py) {
+						if (++stkf >= stk) {
+							stkf = 0;
+							d = pq[pi], e = rotation[d][pr];
+							for (i = 0; i < 16; ++i)
+								if (e>>i&1)
+									data[px+i%4][py+(i/4|0)] = d+1;
+							px = (cols>>1)-2;
+							py = -2;
+							pr = 0;
+							if (++pi == 7) {
+								pi = 0;
+								shuffle();
+							}
+							d = false;
+							l: for (y = 0; y < rows; ++y) {
+								for (x = 0; x < cols; ++x)
+									if (!data[x][y])
+										continue l;
+								for (i = y; i >= 0; --i)
+									for (x = 0; x < cols; ++x)
+										data[x][i] = data[x][i-1];
+								$lines.html(++lines)
+								d = true;
+							}
+							if (d)
+								$speed.html(spd -= 5);
+							if (collide(px, py, pr))
+								ded = true;
+							$blocks.html(++blocks);
+						}
+						spdf = 0;
+					}
+					else if (++spdf >= spd) {
+						spdf = 0;
+						++py;
+					}
+				}
+				else {
+					x = ctx.canvas.width;
+					y = ctx.canvas.height;
+					ctx.fillStyle = "rgba(0,0,0,.7)";
+					ctx.fillRect(0, 0, x, y);
+					ctx.font = "120px Verdana";
+					ctx.fillStyle = "#FFFFFF";
+					ctx.fillText("GAME OVER", x/2-370, y/2-10);
+					ctx.font = "30px Verdana";
+					ctx.fillText("Lines: "+lines, x/2-90, y/2+70);
+				}
+			});
+			$(document).keydown(function(e) {
+				switch (e.keyCode) {
+					case left: fleft(); break;
+					case right: fright(); break;
+					case rcw: rotate(-1); break;
+					case rccw: rotate(1); break;
+					case sdrop: down(); break;
+					case hdrop: space(); break;
+					case 13: if (ded) init(); break;
+				}
+				e.preventDefault();
+			});
+
+			$(".bind").keydown(function(e) {
+				switch (this.id) {
+					case "left": left = e.keyCode; break;
+					case "right": right = e.keyCode; break;
+					case "rcw": rcw = e.keyCode; break;
+					case "rccw": rccw = e.keyCode; break;
+					case "sdrop": sdrop = e.keyCode; break;
+					case "hdrop": hdrop = e.keyCode; break;
+				}
+				this.value = keyboardMap[e.keyCode];
+				e.preventDefault();
+			});
+			$("#restart").click(init);
+		});
+	</script>
+</head>
+
+<body>
+	<div id="canvas"></div>
+	<div id="options">
+		<section>
+			<p><span class="label">Move Left:</span><input id="left" class="bind" type="text" value="LEFT"></p>
+			<p><span class="label">Rotate CW:</span><input id="rcw" class="bind" type="text" value="UP"></p>
+			<p><span class="label">Soft Drop:</span><input id="sdrop" class="bind" type="text" value="DOWN"></p>
+		</section>
+		<section>
+			<p><span class="label">Move Right:</span><input id="right" class="bind" type="text" value="RIGHT"></p>
+			<p><span class="label">Rotate CCW:</span><input id="rccw" class="bind" type="text" value=""></p>
+			<p><span class="label">Hard Drop:</span><input id="hdrop" class="bind" type="text" value="SPACE"></p>
+		</section>
+		<section>
+			<p><span class="label">Lines:</span><span id="lines"></span></p>
+			<p><span class="label">Speed:</span><span id="speed"></span></p>
+			<p><span class="label">Blocks:</span><span id="blocks"></span></p>
+		</section>
+		<section id="last">
+			<audio controls autoplay loop id="music"><source src="TypeA.wav" type="audio/wav"></audio>
+			<input id="restart" class="butt" type="button" value="Restart"><br>
+			Old, crappy, terribly coded Java applet version <a href="old.html">here</a>.
+		</section>
+	</div>
+</body>
+</html>

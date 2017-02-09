@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Tree</title>
+	<style>
+		html, body {width: 100%; height: 100%; margin: 0px; border: 0px; padding: 0px; overflow: hidden}
+		#canvas    {position: fixed; top: 0px; left: 0px; box-sizing: border-box; width: 100%; height: 100%; border-right: 400px solid #000000; background-color: #000000}
+		#options   {position: fixed; top: 0px; right: 0px; box-sizing: border-box; width: 400px; height: 100%; border-left: 2px solid #FFFFFF; padding: 50px; color: #FFFFFF; overflow: auto}
+		.label     {display: inline-block; width: 50px; margin-bottom: 5px}
+	</style>
+	<script src="../../assets/js/jquery.js"></script>
+	<script src="../../assets/js/pillow/pfcanvas.js"></script>
+	<script>
+		// ugly age old code. idk what i was thinking
+		var CO, CF, CL, T, I, L, U, S, E, D, B, O, A, K, R, F, Q, P, N, C, Z, V, GO, GF, GL, done, ii, l, t;
+		function redraw() {
+			CO = $("#CO").val(); CF = $("#CF").val(); CL = {r:pf("CLr"), g:pf("CLg"), b:pf("CLb")};
+			T = pf("T"), I = pf("I"), L = pf("L"), U = pf("U"), S = pf("S"), E = pf("E"), D = pf("D"), B = pf("B"), O = pf("O"), A = pf("A"), K = pf("K"), R = pf("R"), F = pf("F"), Q = pf("Q"), P = pf("P"), N = pf("N"), C = pf("C"), Z = pf("Z"), V = pf("V");// G = 2, H = 1;
+			GO = createOffscreen(), GF = createOffscreen(), GL = createOffscreen();
+			GO.fillStyle = CO, GF.fillStyle = CF;
+			done = false, ii = 0, l = new Array(), t = I;
+			l.push({x: GO.canvas.width/2, y: GO.canvas.height, d: Math.PI/2, e: I*E+Math.random()*U});
+		}
+
+		function createOffscreen() {
+			var cvs = document.createElement("canvas");
+			cvs.width = 2000, cvs.height = 2000;
+			return cvs.getContext("2d");
+		}
+		function pf(e) {
+			return parseFloat($("#"+e).val());
+		}
+		function rn(d) {
+			return Math.random()*d*2-d;
+		}
+		$(function() {
+			var options = ["CO", "rgb(255,255,255)", "CF", "rgb(0,0,0)", "CLr", 255, "CLg", 0, "CLb", 0, "T", .61, "I", 80, "L", 1.7, "U", 4.5, "S", .992, "E", .07, "D", .04, "B", .0135, "O", .00006, "A", .5, "K", .0011, "R", .30, "F", -.036, "Q", .0005, "P", 34, "N", 180, "C", .3, "Z", 12, "V", 5];
+			// somewhere in my original Java code, there are explanations for these values
+			var elem = $("#options");
+			for (var i = 0; i < options.length; i += 2)
+				elem.append("<span class=\"label\">"+options[i]+"</span><input id=\""+options[i]+"\" type=\"text\" value=\""+options[i+1]+"\"><br>");
+			elem.append("<br><br><input type=\"button\" value=\"redraw\" onclick=\"redraw();\">");
+			redraw();
+			
+			$("#canvas").pillowcanvas(function(ctx) {
+				ctx.fillStyle = "#000000";
+				ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+				if (!done) {
+					var n = new Array(), r = new Array();
+					for (var j = 0; j < l.length; ++j) {
+						var b = l[j];
+						var y, c = L*Math.cos(b.d), s = L*Math.sin(b.d);
+						GO.beginPath();
+						GO.arc(b.x, b.y, t/2, 0, Math.PI*2);
+						GO.closePath();
+						GO.fill();
+						GF.beginPath();
+						GF.arc(b.x, b.y, t*T/2, 0, Math.PI*2);
+						GF.closePath();
+						GF.fill();
+						b.x += c;
+						b.y -= s;
+						b.d += rn(D);
+						if (t/I < R && Math.random() < F+ii*Q) {
+							var x = Math.random()*Math.PI*2, y = Math.random()*P, c = b.x+Math.cos(x)*y, s = b.y+Math.sin(x)*y;
+							x = Z+rn(V);
+							var cr = Math.floor(CL.r+255*rn(C)),
+									cg = Math.floor(CL.g+255*rn(C)),
+									cb = Math.floor(CL.b+255*rn(C)),
+									ca = Math.floor(N+255*rn(C));
+							cr = cr > 255 ? 255 : cr < 0 ? 0 : cr;
+							cg = cg > 255 ? 255 : cg < 0 ? 0 : cg;
+							cb = cb > 255 ? 255 : cb < 0 ? 0 : cb;
+							ca = ca > 255 ? 255 : ca < 0 ? 0 : ca;
+//              var ls = [Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2];
+//              var ic = c+x/2*Math.cos(ls[0]), is = s+x/2*Math.sin(ls[0]);
+							GL.fillStyle = "rgba("+cr+","+cg+","+cb+","+ca/255+")";
+//              GL.lineWidth = G+rn(H);
+							GL.beginPath();
+							GL.arc(c, s, x/2, 0, Math.PI*2);
+//              GL.moveTo(ic, is);
+//              GL.lineTo(c+x/2*Math.cos(ls[1]), s+x/2*Math.sin(ls[1]));
+//              GL.lineTo(c+x/2*Math.cos(ls[2]), s+x/2*Math.sin(ls[2]));
+//              GL.lineTo(ic, is);
+							GL.closePath();
+							GL.fill();
+						}
+						if (Math.random() < B+ii*O)
+							n.push({x: b.x, y: b.y, d: b.d+rn(A+ii*K), e: I*E+Math.random()*U});
+						if (t < b.e)
+							r.push(b);
+					}
+					for (var j = 0; j < r.length; ++j)
+						l.splice(l.indexOf(r[j]));
+					for (var j = 0; j < n.length; ++j)
+						l.push(n[j]);
+					t *= S;
+					++ii;
+					if (l.length == 0)
+						done = true;
+				}
+				ctx.drawImage(GO.canvas, (ctx.canvas.width-GO.canvas.width)/2, ctx.canvas.height-GO.canvas.height);
+				ctx.drawImage(GF.canvas, (ctx.canvas.width-GF.canvas.width)/2, ctx.canvas.height-GF.canvas.height);
+				ctx.drawImage(GL.canvas, (ctx.canvas.width-GL.canvas.width)/2, ctx.canvas.height-GL.canvas.height);
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<div id="canvas"></div>
+	<div id="options"></div>
+</body>

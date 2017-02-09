@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>asdf</title>
+	<style>
+		html, body {width: 100%; height: 100%; margin: 0; border: 0; padding: 0}
+	</style>
+	<script src="../jquery.js"></script>
+	<script src="pfcanvas.js"></script>
+	<script>
+		var pillowfication = [
+			// P
+			[25, 0, 45, 20, 25, 40],
+			[45, 20, 25, 40, 45, 60],
+			[25, 40, 45, 60, 25, 80],
+			[45, 60, 25, 80, 45, 100],
+			[25, 80, 45, 100, 25, 120],
+			[45, 100, 25, 120, 45, 140],
+			[55, 140, 75, 120, 55, 100],
+			[75, 120, 55, 100, 75, 80],
+			[55, 100, 75, 80, 55, 60],
+			[75, 120, 95, 100, 75, 80],
+			[0, 136, 32, 136, 16, 120],
+			// I
+			[90, 0, 110, 20, 90, 40],
+			[110, 20, 90, 40, 110, 60],
+			[90, 50, 110, 70, 90, 70],
+			// L
+			[120, 0, 140, 20, 120, 40],
+			[140, 20, 120, 40, 140, 60],
+			[120, 40, 140, 60, 120, 80],
+			[140, 60, 120, 80, 140, 100],
+			// L
+			[150, 0, 170, 20, 150, 40],
+			[170, 20, 150, 40, 170, 60],
+			[150, 40, 170, 60, 150, 80],
+			[170, 60, 150, 80, 170, 100],
+			// O
+			[200, 8, 178, 30, 200, 30],
+			[200, 30, 178, 30, 200, 52],
+			[208, 60, 238, 30, 208, 30],
+			[208, 30, 238, 30, 208, 0],
+			// W
+			[266, 0, 246, 20, 266, 40],
+			[246, 20, 266, 40, 246, 60],
+			[266, 15, 281, 30, 296, 15],
+			[296, 0, 316, 20, 296, 40],
+			[316, 20, 296, 40, 316, 60],
+			// F
+			[326, 0, 346, 20, 326, 40],
+			[346, 20, 326, 40, 346, 60],
+			[326, 40, 346, 60, 326, 80],
+			[346, 60, 326, 80, 346, 100],
+			[354, 100, 378, 76, 354, 76],
+			[354, 76, 378, 52, 354, 52],
+			// I
+			[386, 0, 406, 20, 386, 40],
+			[406, 20, 386, 40, 406, 60],
+			[386, 50, 406, 70, 386, 70],
+			// C
+			[436, 8, 414, 30, 436, 30],
+			[436, 30, 414, 30, 436, 52],
+			[444, 60, 470, 34, 444, 34],
+			[444, 0, 470, 26, 444, 26],
+			// A
+			[500, 8, 478, 30, 500, 52],
+			[528, 0, 508, 20, 528, 40],
+			[508, 20, 528, 40, 508, 60],
+			// T
+			[538, 0, 558, 20, 538, 40],
+			[558, 20, 538, 40, 558, 60],
+			[538, 40, 558, 60, 538, 80],
+			[566, 52, 578, 40, 566, 40],
+			// I
+			[586, 0, 606, 20, 586, 40],
+			[606, 20, 586, 40, 606, 60],
+			[586, 50, 606, 70, 586, 70],
+			// O
+			[638, 8, 616, 30, 638, 30],
+			[638, 30, 616, 30, 638, 52],
+			[646, 60, 676, 30, 646, 30],
+			[646, 30, 676, 30, 646, 0],
+			// N
+			[704, 0, 684, 20, 704, 40],
+			[684, 20, 704, 40, 684, 60],
+			[732, 0, 712, 20, 732, 40],
+			[712, 20, 732, 40, 712, 60]
+		];
+		var bound = [0, 0, 732, 140];
+		var offsetX = bound[0]-bound[2] >> 1;
+		var offsetY = bound[1]-bound[3] >> 1;
+
+		var fade = 40;
+		var fadeOffset = -60;
+		var pop = 15;
+		var drop = -1;
+		var die = 250;
+
+		var data = [];
+		for (var i = 0; i < pillowfication.length; ++i) {
+			data.push({
+				state: 0,
+				frame: Math.random()*fadeOffset|0,
+				dX: 0,
+				dY: 0,
+				vX: 0,
+				vY: 0
+			});
+		}
+
+		var mouseX = 0, mouseY = 0;
+
+		$(function() {
+			$("body").pillowcanvas(function(ctx) {
+				var width = ctx.canvas.width, height = ctx.canvas.height;
+				ctx.clearRect(0, 0, width, height);
+				var cX = (width >> 1)+offsetX, cY = (height >> 1)-offsetY;
+				var mX = mouseX-cX, mY = cY-mouseY;
+
+				for (var i = 0; i < pillowfication.length; ++i) {
+					var triangle = pillowfication[i];
+					var datum = data[i];
+					switch (datum.state) {
+						case 0:
+							if (++datum.frame > 0) {
+								ctx.beginPath();
+								ctx.moveTo(cX+triangle[0], cY-triangle[1]);
+								ctx.lineTo(cX+triangle[2], cY-triangle[3]);
+								ctx.lineTo(cX+triangle[4], cY-triangle[5]);
+								ctx.closePath();
+								ctx.fillStyle = "rgba(0,0,0,"+datum.frame/fade+")";
+								ctx.fill();
+								if (datum.frame > fade) {
+									datum.state = 1;
+									datum.frame = 0;
+								}
+							}
+							break;
+						case 1:
+							ctx.beginPath();
+							ctx.moveTo(cX+triangle[0], cY-triangle[1]);
+							ctx.lineTo(cX+triangle[2], cY-triangle[3]);
+							ctx.lineTo(cX+triangle[4], cY-triangle[5]);
+							ctx.closePath();
+							ctx.fillStyle = "#000000";
+							ctx.fill();
+							if (inside(triangle, mX, mY)) {
+								datum.state = 2;
+								var theta = Math.random()*Math.PI/2+Math.PI/4;
+								datum.vX = pop*Math.cos(theta);
+								datum.vY = pop*Math.sin(theta);
+							}
+							break;
+						case 2:
+							if (++datum.frame < die) {
+								ctx.beginPath();
+								ctx.moveTo(cX+datum.dX+triangle[0], cY-datum.dY-triangle[1]);
+								ctx.lineTo(cX+datum.dX+triangle[2], cY-datum.dY-triangle[3]);
+								ctx.lineTo(cX+datum.dX+triangle[4], cY-datum.dY-triangle[5]);
+								ctx.closePath();
+								ctx.fillStyle = "#000000";
+								ctx.fill();
+								datum.dX += datum.vX;
+								datum.dY += datum.vY;
+								datum.vY += drop;
+							} else {
+								datum.state = 0;
+								datum.frame = 0;
+								datum.dX = 0;
+								datum.dY = 0;
+							}
+							break;
+					}
+				}
+			}).mousemove(function(e) {
+				mouseX = e.pageX;
+				mouseY = e.pageY;
+				console.log(mouseX, mouseY);
+			});
+		});
+
+		function inside(t, x, y) {
+			var det = (t[3]-t[5])*(t[0]-t[4]) + (t[4]-t[2])*(t[1]-t[5]);
+			var lam1 = ((t[3]-t[5])*(x-t[4]) + (t[4]-t[2])*(y-t[5]))/det,
+			    lam2 = ((t[5]-t[1])*(x-t[4]) + (t[0]-t[4])*(y-t[5]))/det;
+			return lam1 > 0 && lam2 > 0 && lam1+lam2 < 1;
+		}
+	</script>
+</head>
+
+<body>
+</body>
+</html>
