@@ -2,6 +2,6 @@
   "name": "pillowfication-old",
   "version": "0.0.0",
   "dependencies": {
-    "express": "^4.14.1"
+    "express": "^4.16.2"
   }
 }
