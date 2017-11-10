@@ -2,6 +2,7 @@
   "name": "pillowfication-old",
   "version": "0.0.0",
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "serve-favicon": "^2.4.5"
   }
 }
