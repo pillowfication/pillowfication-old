@@ -1,6 +1,6 @@
 /*
  *   This returns a Perlin noise object to grab values from.
- *   
+ *
  *   options: {
  *       dimensions:    Number of dimensions,
  *       min:           Minimum value to return,
@@ -11,7 +11,7 @@
  *       persistence:   Weight of each successive octave,
  *       interpolation: Interpolation function to use
  *   }
- *   
+ *
  *   returns: {
  *       get: function(x...) Returns the value at the location [x0, x1, ..., xn]. Accepts both
  *           arrays and var-args.

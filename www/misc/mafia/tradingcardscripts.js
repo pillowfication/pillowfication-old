@@ -11,7 +11,7 @@ function createCard(type, data) {
 		$elemCardFront.append($elemName).append($elemImage).append($elemText);
 		var $elemCardBack = elementClass("div", "back");
 	$elemCard.append($elemCardFront).append($elemCardBack);
-	
+
 	return $elemCard;
 }
 (function($) {

@@ -1,11 +1,11 @@
 /*
  *   This creates a Voronoi diagram of a set of points by computing the dual of its Delaunay
  *   triangulation. Requires pfdelaunay.js.
- *   
+ *
  *   points: an array of points {x: Float, y: Float}
  *   domain: an array of points {x: Float, y: Float} in counter-clockwise order representing a
  *       bounding convex polygon to clip edge Voronoi polygons.
- *   
+ *
  *   returns: {
  *       points: an array of points used by polygons
  *       polygons: an array of arrays of integers such that
@@ -48,7 +48,7 @@
 				       (ca.x-point.x)*(cb.y-point.y) - (ca.y-point.y)*(cb.x-point.x);
 			});
 
-			var polygon = 
+			var polygon =
 		}
 
 	};

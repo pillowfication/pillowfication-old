@@ -4,11 +4,11 @@
  *   representation of the voids which would allow the probability of dart throwing success to
  *   actually increase with time. Right now it kinda just hits a wall, particularly when two
  *   disks' intersection is completely inside the void.
- *   
+ *
  *   domain: an array of points {x, y} representing vertices of a polygon ordered counter-clockwise
  *   radius: minimum distance between any two points
  *   initial: (optional) an array of points {x, y} that will be thrown (and tested because each cell can only allow 1 point) before the dart throwing
- *   
+ *
  *   returns: an array of points {x, y}
  */
 
@@ -21,7 +21,7 @@
 function poisson(domain, radius, initial) {
 	"use strict";
 	var start = new Date(), points = [];
-	
+
 	// INITIALIZATION
 	var rad2 = radius*radius, size = radius/Math.sqrt(2), xMin = domain[0].x, yMin = domain[0].y, xMax = xMin, yMax = yMin;
 	for (var i = 1; i < domain.length; ++i) {
@@ -60,7 +60,7 @@ function poisson(domain, radius, initial) {
 				cellGrid[index] = {x: c, y: r, edges: edges, point: null, poly: null};
 			}
 		}
-	
+
 	// PHASE 1
 	// Throw initial darts
 	if (initial)
@@ -86,7 +86,7 @@ function poisson(domain, radius, initial) {
 		else if (++misses >= 400 && i > min)
 			break;
 	}
-	
+
 	// PHASE 2
 	var pl = valid.length, stop = 0;
 	while (valid.length > 0) {
@@ -199,10 +199,10 @@ function poisson(domain, radius, initial) {
 				break;
 		}
 	}
-	
+
 	console.log("Poisson Disk: "+points.length+" points in "+(new Date()-start)/1000+"s");
 	return points;
-	
+
 	// d: {x, y} center of a circle of radius radius
 	// c: cell object (with c.point == null)
 	// b: (optional) boolean if set to true, then d is known to be inside the domain (avoids checking)

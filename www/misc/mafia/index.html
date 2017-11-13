@@ -8,18 +8,18 @@
 		html, body {width: 100%; height: 100%; margin: 0px; padding: 0px; background-color: #141414; font-family: COUTURE, Arial, arial, Helvetica, san-serif; color: #EFEFEF}
 		h1 {font-size: 52px}
 		h2 {font-size: 38px}
-		
+
 		#header {text-align: center; padding: 20px 0px 10px 0px; background-color: #141414; font-size: 32px}
 		#main   {width: 100%; max-width: 1300px; margin: 0px auto}
 		#padder {border-radius: 30px; padding: 20px 40px; background-color: #333333}
 		.clear  {clear: both}
 		#footer {height: 100px; padding-top: 20px; text-align: center; font-family: "Times New Roman", serif; font-size: 14px; color: #909090}
-		
+
 		.ch {cursor: pointer}
 		.ch:hover {color: #FF3737}
 		#mccon, #sccon, #eccon {overflow: hidden}
 		.closed {height: 0px}
-		
+
 		.cinfo {margin-bottom: 15px}
 		.cinfo > div {overflow: hidden; min-width: 240px}
 		.iname {float: left; width: 240px; font-size: 24px; cursor: pointer}
@@ -29,7 +29,7 @@
 		.iname a:active {color: #EFEFEF}
 		.iabil span {font-family: Arial, arial, Helvetica, sans-serif}
 		.iflav span {font-family: Arial, arial, Helvetica, sans-serif; font-style: italic}
-		
+
 		#tccon {text-align: center}
 	</style>
 	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
@@ -40,7 +40,7 @@
 			xmlHttp.open("GET", "tc.xml", false);
 			xmlHttp.send();
 			xmlDoc = xmlHttp.responseXML;
-			
+
 			cardsXml = xmlDoc.getElementsByTagName("monstercards")[0].getElementsByTagName("card");
 			monsterCards = new Array();
 			for (i = 0; i < cardsXml.length; ++i) {
@@ -78,7 +78,7 @@
 				cn = node.getElementsByTagName(value)[0].childNodes[0];
 				return (cn) ? cn.nodeValue : "";
 			}
-			
+
 			var $con = $("#mccon");
 			for (i = 0; i < monsterCards.length; ++i)
 				$con.append(spitter(monsterCards[i]));
@@ -88,11 +88,11 @@
 			$con = $("#eccon");
 			for (i = 0; i < equipCards.length; ++i)
 				$con.append(spitter(equipCards[i]));
-			
+
 			$("#mch").click(function() {$("#mccon").toggleClass("closed");});
 			$("#sch").click(function() {$("#sccon").toggleClass("closed");});
 			$("#ech").click(function() {$("#eccon").toggleClass("closed");});
-			
+
 			$con = $("#tccon");
 			for (i = 0; i < monsterCards.length; ++i)
 				$con.append(createCard("monster", monsterCards[i]));
@@ -100,11 +100,11 @@
 				$con.append(createCard("spell", spellCards[i]));
 			for (i = 0; i < equipCards.length; ++i)
 				$con.append(createCard("equip", equipCards[i]));
-			
+
 			$(".card").click(function() {
 				$(this).flip();
 			});
-			
+
 			function spitter(data) {
 				$elem = elementClass("div", "cinfo");
 					$name = elementClass("div", "iname").html("<a href=\"#"+data.name+"\">"+data.name+"</a>");

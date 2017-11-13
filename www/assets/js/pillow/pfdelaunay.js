@@ -1,12 +1,12 @@
 /*
  *   This creates a Delaunay triangulation of a set of points by using a sweepline approach.
- *   
+ *
  *   points: an array of points {x: Float, y: Float}
- *   
+ *
  *   returns: {
  *       triangles: an array of arrays [a, b, c] representing a triangle whose vertices are at
  *           points[a], points[b], points[c] in counter-clockwise order
- *       edges: 
+ *       edges:
  *       data: an array of arrays such that data[i] represents all triangles which include
  *           points[i]
  *       hull: an array of integers such that points[hull[0]] ... points[hull[n]] represent
