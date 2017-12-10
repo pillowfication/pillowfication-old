@@ -1,6 +1,21 @@
 {
   "name": "pillowfication-old",
   "version": "0.0.0",
+  "description": "http://old.pillowfication.com",
+  "author": {
+    "name": "Markus Tran",
+    "email": "thebluepillow@gmail.com",
+    "url": "http://pillowfication.com"
+  },
+  "homepage": "https://github.com/pillowfication/pillowfication-old",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pillowfication/pillowfication-old.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pillowfication/pillowfication-old/issues"
+  },
+  "main": "server.js",
   "dependencies": {
     "express": "^4.16.2",
     "serve-favicon": "^2.4.5"
